@@ -22,7 +22,7 @@ public class Board extends JPanel implements  Runnable{
 
     private final ArrayList<Player> playerList;
     private final JFrame jframe;
-    private Image board;
+    private final Image board;
     private final int FPS = 60;
     private final UI ui;
     private int turn;
@@ -35,9 +35,7 @@ public class Board extends JPanel implements  Runnable{
         // Reading board image
         try {
             board = ImageIO.read(new File("images/board.png")).getScaledInstance(1041,1041,Image.SCALE_SMOOTH);
-        } catch (IOException ignored) {
-            //TODO: Handle exception instead of just ignoring it
-        }
+        } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.", e); }
 
         playerList = players;
         jframe = frame;
@@ -65,7 +63,6 @@ public class Board extends JPanel implements  Runnable{
 
         while(gameThread != null) {
 
-
             currentTime = System.nanoTime();
 
             //Calculating the time delta
@@ -87,7 +84,6 @@ public class Board extends JPanel implements  Runnable{
                 drawCount = 0;
                 timer = 0;
             }
-
         }
     }
 

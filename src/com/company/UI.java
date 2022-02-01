@@ -15,8 +15,8 @@ public class UI {
     private final Board bp;
     private boolean nextTurn = false;
 
-    private Image dice;
-    private JButton rollButton;
+    private final Image diceImage;
+    private final JButton rollButton;
 
     private final ArrayList<Player> playerList;
     private Player currentPlayer;
@@ -26,6 +26,9 @@ public class UI {
 
     private final int screenWidth;
     private final int screenHeight;
+
+    private final ArrayList<Image> imgNumbers;
+    private final ArrayList<Image> imgNumbersGolden;
 
     private int[] finalRoll;
     private boolean displayDice = false;
@@ -40,6 +43,25 @@ public class UI {
         }
     };
 
+
+    private ArrayList<Image> loadNumberImages(int scale, boolean golden) {
+        ArrayList<Image> loadList= new ArrayList<>();
+        for(int i=0;i<6;i++) {
+            try {
+                String path;
+                if (golden){
+                    path = String.format("images/numbers/golden/%d.png",i+1);
+                }
+                else {
+                    path = String.format("images/numbers/%d.png",i+1);
+
+                }
+                loadList.add(ImageIO.read(new File(path)).getScaledInstance(scale, scale, Image.SCALE_SMOOTH));
+                //TODO: Add other images for buttons
+            } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
+        }
+        return loadList;
+    }
 
     public UI(Board bp, ArrayList<Player> pList) {
 
@@ -56,15 +78,15 @@ public class UI {
         currentPlayer = pList.get(0);
         playerList = pList;
 
+        imgNumbers = loadNumberImages((int) (200*scaleFactorWidth), false);
+        imgNumbersGolden = loadNumberImages((int) (200*scaleFactorWidth), true);
         //Loading Images
         try {
-            this.dice = ImageIO.read(new File("images/dice.png")).getScaledInstance(100,100, Image.SCALE_SMOOTH);
+            diceImage = ImageIO.read(new File("images/dice.png")).getScaledInstance(100,100, Image.SCALE_SMOOTH);
             //TODO: Add other images for buttons
-        } catch (IOException ignored) {
-            //TODO: Handle exception instead of just ignoring it
-        }
+        } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
 
-        rollButton = createButton(dice,
+        rollButton = createButton(diceImage,
                 (int) (100*scaleFactorWidth),
                 (int) (100*scaleFactorHeight),
                 (int) ((screenWidth/2)-60*scaleFactorWidth),
@@ -92,13 +114,13 @@ public class UI {
 
     //Generating first random numbers to display when rolling
     Random rand = new Random();
-    private String firstDiceString = String.format("%d", rand.nextInt(1, 7));
-    private String secondDiceString = String.format("%d", rand.nextInt(1, 7));
+    private int firstDice = rand.nextInt(1, 7);
+    private int secondDice = rand.nextInt(1, 7);
 
     private int diceCounter;
 
     public void draw(Graphics2D g2) {
-        g2.drawImage(dice,
+        g2.drawImage(diceImage,
                 (int) ((screenWidth/2)-60*scaleFactorWidth),
                 (int) (screenHeight/1.35),
                 (int) (100*scaleFactorWidth),
@@ -106,21 +128,40 @@ public class UI {
                 null);
         if (displayDice) {
             if (diceCounter < 151) {
-
                 if (diceCounter % 5 == 0) {
-                    firstDiceString = String.format("%d", rand.nextInt(1, 7));
-                    secondDiceString = String.format("%d", rand.nextInt(1, 7));
+                    firstDice = rand.nextInt(1, 7);
+                    secondDice = rand.nextInt(1, 7);
 
+                    int tmpInt = rand.nextInt(1, 7);
+
+                    if (tmpInt != firstDice) {
+                        firstDice = tmpInt;
+                    } else if (tmpInt+1 < 7) {
+                        firstDice = tmpInt + 1;
+                    }
+                    else {firstDice = tmpInt - 1;}
+
+                    tmpInt = rand.nextInt(1, 7);
+
+                    if (tmpInt != secondDice) {
+                        secondDice = tmpInt;
+                    } else if (tmpInt+1 < 7) {
+                        secondDice = tmpInt + 1;
+                    }
+                    else {secondDice = tmpInt - 1;}
                 }
-                //TODO: Add proper numbers and positions
-                g2.drawString(firstDiceString, 500, 500);
-                g2.drawString(secondDiceString, 550, 550);
+                g2.drawImage(imgNumbers.get(firstDice-1), screenWidth/2-175, 250, null);
+                g2.drawImage(imgNumbers.get(secondDice-1), screenWidth/2-25, 250, null);
                 diceCounter += 1;
             }
             else {
-                //TODO: See above
-                g2.drawString(String.format("%d",finalRoll[0]),500,500);
-                g2.drawString(String.format("%d",finalRoll[1]),550,550);
+                if (finalRoll[0] == finalRoll[1]) {
+                    g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
+                    g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
+                } else {
+                    g2.drawImage(imgNumbers.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
+                    g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
+                }
             }
         }
     }
