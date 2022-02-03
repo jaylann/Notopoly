@@ -19,7 +19,18 @@ public class UI {
     private final JButton rollButton;
     private final JButton nextButton;
 
+    private final setupUI setupui;
+
     private final Image nextTurnImage;
+
+    public int getWidth() {
+        return screenWidth;
+    }
+
+    public int getHeight() {
+        return screenHeight;
+    }
+
     private final Image nextTurnImageGrey;
 
     private final ArrayList<Player> playerList;
@@ -27,6 +38,11 @@ public class UI {
 
     private final int screenWidth;
     private final int screenHeight;
+
+    public double getScaleFactor() {
+        return scaleFactor;
+    }
+
     private final double scaleFactor;
 
     private final ArrayList<Image> imgNumbers;
@@ -36,12 +52,16 @@ public class UI {
     private int[] finalRoll;
     private boolean displayDice = false;
 
+    private final boolean setup = true;
+
     private final ActionListener diceListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            finalRoll = currentPlayer.roll();
-            displayDice = true;
-            nextTurnAvailable = true;
+            if (!displayDice){
+                finalRoll = currentPlayer.roll();
+                displayDice = true;
+                nextTurnAvailable = true;
+            }
         }
     };
 
@@ -58,32 +78,30 @@ public class UI {
         screenHeight = bp.getScreenHeight();
         screenWidth = bp.getScreenWidth();
         scaleFactor = 1080.0/screenHeight;
-
+        setupui = new setupUI(this.bp,this);
         currentPlayer = pList.get(0);
         playerList = pList;
 
         //Loading Images
         diceImage = loadImage("images/dice.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
-        nextTurnImage = loadImage("images/nextArrow.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
-        nextTurnImageGrey = loadImage("images/nextArrowGrey.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        nextTurnImage = loadImage("images/nextTurnArrow.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        nextTurnImageGrey = loadImage("images/nextTurnArrowGrey.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
         imgNumbers = loadNumberImages((int) (200*scaleFactor),(int) (200*scaleFactor), false);
         imgNumbersGolden = loadNumberImages((int) (200*scaleFactor), (int) (200*scaleFactor), true);
 
-        rollButton = createButton(diceImage,
-                (int) (100*scaleFactor),
+        rollButton = createButton((int) (100*scaleFactor),
                 (int) (100*scaleFactor),
                 (int) ((screenWidth/2)-60*scaleFactor),
                 (int) (screenHeight/1.35),
                 diceListener);
-        nextButton = createButton(nextTurnImage,
-                (int) (100*scaleFactor),
+        nextButton = createButton((int) (100*scaleFactor),
                 (int) (100*scaleFactor),
                 (int) ((screenWidth/2)-180*scaleFactor),
                 (int) (screenHeight/1.35), nextListener);
         //TODO: Add different buttons
     }
 
-    private Image loadImage(String path, int width, int height) {
+    protected Image loadImage(String path, int width, int height) {
         try {
             return ImageIO.read(new File(path)).getScaledInstance(width, height, Image.SCALE_SMOOTH);
         } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
@@ -104,8 +122,10 @@ public class UI {
         return loadList;
     }
 
-    private JButton createButton(Image btnImage, int width, int height, int x, int y, ActionListener btnListener) {
-        JButton newButton = new JButton(new ImageIcon(btnImage));
+
+
+    protected JButton createButton(int width, int height, int x, int y, ActionListener btnListener) {
+        JButton newButton = new JButton();
         newButton.setLocation(x, y);
         newButton.setSize(width, height);
         newButton.setVisible(true);
@@ -129,60 +149,66 @@ public class UI {
     private int diceCounter;
 
     public void draw(Graphics2D g2) {
-        g2.drawImage(diceImage,
-                (int) ((screenWidth/2)-60*scaleFactor),
-                (int) (screenHeight/1.35),
-                (int) (100*scaleFactor),
-                (int) (100*scaleFactor),
-                null);
-        if (nextTurnAvailable) {
-            g2.drawImage(nextTurnImage,
-                    (int) ((screenWidth/2)-180*scaleFactor),
-                    (int) (screenHeight/1.35),
-                    (int) (100*scaleFactor),
-                    (int) (100*scaleFactor),
-                    null);
-        } else {
-            g2.drawImage(nextTurnImageGrey,
-                    (int) ((screenWidth/2)-180*scaleFactor),
-                    (int) (screenHeight/1.35),
-                    (int) (100*scaleFactor),
-                    (int) (100*scaleFactor),
-                    null);
+        if (setup) {
+            setupui.draw(g2);
         }
-        if (displayDice) {
-            if (diceCounter < 50) {
-                if (diceCounter % 5 == 0) {
-                    firstDice = rand.nextInt(1, 7);
-                    secondDice = rand.nextInt(1, 7);
-
-                    int tmpInt = rand.nextInt(1, 7);
-                    if (tmpInt != firstDice) {
-                        firstDice = tmpInt;
-                    } else if (tmpInt+1 < 7) {
-                        firstDice = tmpInt + 1;
-                    } else {firstDice = tmpInt - 1;}
-
-                    tmpInt = rand.nextInt(1, 7);
-                    if (tmpInt != secondDice) {
-                        secondDice = tmpInt;
-                    } else if (tmpInt+1 < 7) {
-                        secondDice = tmpInt + 1;
-                    } else {secondDice = tmpInt - 1;}
-                }
-                g2.drawImage(imgNumbers.get(firstDice-1), screenWidth/2-175, 250, null);
-                g2.drawImage(imgNumbers.get(secondDice-1), screenWidth/2-25, 250, null);
-                diceCounter += 1;
+        else {
+            g2.drawImage(diceImage,
+                    (int) ((screenWidth/2)-60*scaleFactor),
+                    (int) (screenHeight/1.35),
+                    (int) (100*scaleFactor),
+                    (int) (100*scaleFactor),
+                    null);
+            if (nextTurnAvailable) {
+                g2.drawImage(nextTurnImage,
+                        (int) ((screenWidth/2)-180*scaleFactor),
+                        (int) (screenHeight/1.35),
+                        (int) (100*scaleFactor),
+                        (int) (100*scaleFactor),
+                        null);
+            } else {
+                g2.drawImage(nextTurnImageGrey,
+                        (int) ((screenWidth/2)-180*scaleFactor),
+                        (int) (screenHeight/1.35),
+                        (int) (100*scaleFactor),
+                        (int) (100*scaleFactor),
+                        null);
             }
-            else {
-                if (finalRoll[0] == finalRoll[1]) {
-                    g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
-                    g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
-                } else {
-                    g2.drawImage(imgNumbers.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
-                    g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
+            if (displayDice) {
+                if (diceCounter < 50) {
+                    if (diceCounter % 5 == 0) {
+                        firstDice = rand.nextInt(1, 7);
+                        secondDice = rand.nextInt(1, 7);
+
+                        int tmpInt = rand.nextInt(1, 7);
+                        if (tmpInt != firstDice) {
+                            firstDice = tmpInt;
+                        } else if (tmpInt+1 < 7) {
+                            firstDice = tmpInt + 1;
+                        } else {firstDice = tmpInt - 1;}
+
+                        tmpInt = rand.nextInt(1, 7);
+                        if (tmpInt != secondDice) {
+                            secondDice = tmpInt;
+                        } else if (tmpInt+1 < 7) {
+                            secondDice = tmpInt + 1;
+                        } else {secondDice = tmpInt - 1;}
+                    }
+                    g2.drawImage(imgNumbers.get(firstDice-1), screenWidth/2-175, 250, null);
+                    g2.drawImage(imgNumbers.get(secondDice-1), screenWidth/2-25, 250, null);
+                    diceCounter += 1;
+                }
+                else {
+                    if (finalRoll[0] == finalRoll[1]) {
+                        g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
+                        g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
+                    } else {
+                        g2.drawImage(imgNumbers.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
+                        g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
+                    }
                 }
             }
+
         }
     }
 
@@ -198,6 +224,9 @@ public class UI {
         nextTurnAvailable = false;
     }
 
+    public boolean isSettingUp() {
+        return setup;
+    }
     public void dispose() {
         bp.remove(rollButton);
         rollButton.removeActionListener(diceListener);
