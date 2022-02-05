@@ -16,7 +16,7 @@ public class setupUI{
     private final JTextArea nameBox;
 
     private int page = 0;
-    private final int pages;
+    private int pages;
 
     //Screen Values
     private final int screenWidth;
@@ -62,9 +62,7 @@ public class setupUI{
             else {
                 y=2;
             }
-
             charClicked(figures.get((y+x)+(page*4)));
-
         }
     };
 
@@ -73,23 +71,27 @@ public class setupUI{
         public void actionPerformed(ActionEvent e) {
             if (chosenChar != null) {
 
-
                 if (!nameBox.getText().isEmpty()) {
                     bp.remove(closePageButton);
                     bp.remove(nameBox);
                     bp.remove(acceptPageButton);
+
                     for (JButton btn: btnList) {
                         bp.add(btn);
                     }
                     bp.add(nextPageButton);
                     bp.add(lastPageButton);
+
                     players.add(new Player(8000, nameBox.getText(), chosenChar));
+
+                    //Resetting values and removing chosenChar
+                    figures.remove(chosenChar);
+                    pages = (int) Math.ceil(figures.size()/4.0);
                     chosenChar = null;
                     nameBox.setText("");
+
                     if (players.size() > 3) { end(); }
                 }
-                System.out.println(players);
-
             }
         }
     };
@@ -100,15 +102,16 @@ public class setupUI{
             if (chosenChar != null) {
                 chosenChar = null;
                 nameBox.setText("");
+
                 bp.remove(closePageButton);
                 bp.remove(nameBox);
                 bp.remove(acceptPageButton);
                 for (JButton btn: btnList) {
                     bp.add(btn);
                 }
+
                 bp.add(nextPageButton);
                 bp.add(lastPageButton);
-
             }
         }
     };
@@ -332,8 +335,6 @@ public class setupUI{
     private final Stroke menuStroke = new BasicStroke(10);
     private final Stroke innerStroke = new BasicStroke(4);
 
-
-
     public void draw(Graphics2D g2) {
         //Enabling Anti-Aliasing and setting Priority to Render Quality
         g2.setRenderingHint(
@@ -367,7 +368,8 @@ public class setupUI{
             int x, y, i ,max;
             //Getting max available Figures on page
             if (page+1 == pages) {
-                max = figures.size() % 4;
+                max = (figures.size() % 4);
+                if (max==0){max=4;}
             } else {
                 max = 4;
             }
@@ -412,17 +414,22 @@ public class setupUI{
             g2.drawImage(closeImg, buttonLeftX, buttonY, buttonWidth, buttonHeight, null);
             g2.drawImage(acceptImg, buttonRightX,buttonY,buttonWidth,buttonHeight,null);
 
-            //Checking if string is longer than 24 characters
-            if(g2.getFontMetrics().stringWidth(nameBox.getText()) > 440*scaleFactor) {
-                //Removing last character
-                nameBox.setText(nameBox.getText().substring(0, nameBox.getText().length()-1));
-            }
-
             if (nameBox.getText().isEmpty()) {
                 g2.setColor(emptyTextColor);
                 g2.drawString("Cool Name...", chosenFigureTextX,chosenFigureTextY);
             }
             else {
+                //Sanitizing String
+                if(!nameBox.getText().matches("[A-Za-z0-9]+")) {
+                    nameBox.setText(nameBox.getText().substring(0,nameBox.getText().length()-1));
+                }
+
+                //Checking if string is longer than 24 characters
+                if(g2.getFontMetrics().stringWidth(nameBox.getText()) > 440*scaleFactor) {
+                    //Removing last character
+                    nameBox.setText(nameBox.getText().substring(0, nameBox.getText().length()-1));
+                }
+
                 g2.setColor(Color.white);
                 g2.drawString(nameBox.getText(),chosenFigureTextX,chosenFigureTextY);
             }
