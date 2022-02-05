@@ -20,30 +20,27 @@ public class Board extends JPanel implements  Runnable{
     private final int screenWidth;
     private final int screenHeight;
 
-    private final ArrayList<Player> playerList;
-    private final JFrame jframe;
+    private ArrayList<Player> playerList = null;
     private final Image board;
     private final int FPS = 60;
     private final UI ui;
     private int turn;
 
+    private final double scaleFactor;
+
 
     Thread gameThread;
 
-    public Board(JFrame frame, ArrayList<Player> players) {
+    public Board(JFrame frame) {
         this.setLayout(null);
-        // Reading board image
-        try {
-            board = ImageIO.read(new File("images/board.png")).getScaledInstance(1041,1041,Image.SCALE_SMOOTH);
-        } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.", e); }
-
-        playerList = players;
-        jframe = frame;
 
         screenHeight = frame.getHeight();
         screenWidth = frame.getWidth();
 
-        ui = new UI(this, playerList);
+        scaleFactor = frame.getWidth()/1080.0;
+
+        board = utils.loadImage("images/board.png", (int) (1080*scaleFactor), (int) (1080*scaleFactor));
+        ui = new UI(this);
     }
 
     public void startGameThread() {
@@ -87,10 +84,14 @@ public class Board extends JPanel implements  Runnable{
         }
     }
 
+    public void setPlayerList(ArrayList<Player> pList) {
+        playerList = pList;
+    }
+
     public void update() {
         if (ui.isNextTurn()) {
             turn += 1;
-            if (turn > 3) {turn = 0;}
+            if (turn > playerList.size()-1) {turn = 0;}
             ui.nextTurn(turn);
         }
     }

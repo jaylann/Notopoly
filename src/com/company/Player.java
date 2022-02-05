@@ -1,5 +1,6 @@
 package com.company;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -8,12 +9,11 @@ public class Player {
     private int position = 0;
     private ArrayList<Property> properties;
     private final String name;
-    private final String character;
+    private final Image character;
     private boolean bankrupt = false;
 
-    public Player(int startMoney, String playerName, String playerCharacter) {
+    public Player(int startMoney, String playerName, Image playerCharacter) {
         money = startMoney;
-
         name = playerName;
         character = playerCharacter;
     }
@@ -26,14 +26,34 @@ public class Player {
         System.out.println("First dice: " + firstDice + "    Second dice: " + secondDice);
         return new int[]{firstDice, secondDice};
     }
-    public void removeMoney(int amount) {
+    public boolean removeMoney(int amount) {
         if (money-amount > 0) {
             money -= amount;
+            return true;
         }
-        else {bankrupt = true;}
+        else {return false;}
     }
     public void addMoney(int amount) {
         money+=amount;
     }
 
+    public void buyProperty(int price, Property boughtProperty) {
+        if (removeMoney(price)) {
+            addProperty(boughtProperty);
+        }
+    }
+    public void sellProperty(int price, Property soldProperty, Player buyer) {
+        if (buyer.removeMoney(price)) {
+            removeProperty(soldProperty);
+            buyer.addProperty(soldProperty);
+        }
+    }
+    private void addProperty(Property property) {
+        properties.add(property);
+        property.changeOwner(this);
+    }
+    private void removeProperty(Property property) {
+        properties.remove(property);
+        property.changeOwner(null);
+    }
 }

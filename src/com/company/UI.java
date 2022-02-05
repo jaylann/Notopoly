@@ -33,7 +33,7 @@ public class UI {
 
     private final Image nextTurnImageGrey;
 
-    private final ArrayList<Player> playerList;
+    private ArrayList<Player> playerList;
     private Player currentPlayer;
 
     private final int screenWidth;
@@ -52,7 +52,7 @@ public class UI {
     private int[] finalRoll;
     private boolean displayDice = false;
 
-    private final boolean setup = true;
+    private boolean setup = true;
 
     private final ActionListener diceListener = new ActionListener() {
         @Override
@@ -60,7 +60,6 @@ public class UI {
             if (!displayDice){
                 finalRoll = currentPlayer.roll();
                 displayDice = true;
-                nextTurnAvailable = true;
             }
         }
     };
@@ -72,20 +71,20 @@ public class UI {
         }
     };
 
-    public UI(Board bp, ArrayList<Player> pList) {
+    public UI(Board bp) {
         this.bp = bp;
+
 
         screenHeight = bp.getScreenHeight();
         screenWidth = bp.getScreenWidth();
-        scaleFactor = 1080.0/screenHeight;
+        scaleFactor = screenHeight/1080.0;
+
         setupui = new setupUI(this.bp,this);
-        currentPlayer = pList.get(0);
-        playerList = pList;
 
         //Loading Images
-        diceImage = loadImage("images/dice.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
-        nextTurnImage = loadImage("images/nextTurnArrow.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
-        nextTurnImageGrey = loadImage("images/nextTurnArrowGrey.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        diceImage = utils.loadImage("images/dice.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        nextTurnImage = utils.loadImage("images/nextTurnArrow.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        nextTurnImageGrey = utils.loadImage("images/nextTurnArrowGrey.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
         imgNumbers = loadNumberImages((int) (200*scaleFactor),(int) (200*scaleFactor), false);
         imgNumbersGolden = loadNumberImages((int) (200*scaleFactor), (int) (200*scaleFactor), true);
 
@@ -101,12 +100,6 @@ public class UI {
         //TODO: Add different buttons
     }
 
-    protected Image loadImage(String path, int width, int height) {
-        try {
-            return ImageIO.read(new File(path)).getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
-    }
-
     private ArrayList<Image> loadNumberImages(int width, int height, boolean golden) {
         ArrayList<Image> loadList= new ArrayList<>();
         for(int i=0;i<6;i++) {
@@ -117,7 +110,7 @@ public class UI {
             else {
                 path = String.format("images/numbers/%d.png",i+1);
             }
-            loadList.add(loadImage(path, width,height));
+            loadList.add(utils.loadImage(path, width,height));
         }
         return loadList;
     }
@@ -154,22 +147,22 @@ public class UI {
         }
         else {
             g2.drawImage(diceImage,
-                    (int) ((screenWidth/2)-60*scaleFactor),
-                    (int) (screenHeight/1.35),
+                    (int) ((screenWidth/2)-((100*scaleFactor)/2)),
+                    (int) (screenHeight/1.3),
                     (int) (100*scaleFactor),
                     (int) (100*scaleFactor),
                     null);
             if (nextTurnAvailable) {
                 g2.drawImage(nextTurnImage,
                         (int) ((screenWidth/2)-180*scaleFactor),
-                        (int) (screenHeight/1.35),
+                        (int) (screenHeight/1.3),
                         (int) (100*scaleFactor),
                         (int) (100*scaleFactor),
                         null);
             } else {
                 g2.drawImage(nextTurnImageGrey,
                         (int) ((screenWidth/2)-180*scaleFactor),
-                        (int) (screenHeight/1.35),
+                        (int) (screenHeight/1.3),
                         (int) (100*scaleFactor),
                         (int) (100*scaleFactor),
                         null);
@@ -199,6 +192,9 @@ public class UI {
                     diceCounter += 1;
                 }
                 else {
+                    if (!nextTurnAvailable) {
+                        nextTurnAvailable = true;
+                    }
                     if (finalRoll[0] == finalRoll[1]) {
                         g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-175, 250, null);
                         g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-25, 250, null);
@@ -212,6 +208,12 @@ public class UI {
         }
     }
 
+    public void setPlayerList(ArrayList<Player> pList) {
+        playerList = pList;
+        currentPlayer = pList.get(0);
+
+    }
+
     public boolean isNextTurn() {
         return nextTurn;
     }
@@ -222,6 +224,10 @@ public class UI {
         displayDice = false;
         diceCounter = 0;
         nextTurnAvailable = false;
+    }
+
+    public void endSetup() {
+        setup=false;
     }
 
     public boolean isSettingUp() {
