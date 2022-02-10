@@ -11,4 +11,5 @@ public class utils {
             return ImageIO.read(new File(path)).getScaledInstance(width, height, Image.SCALE_SMOOTH);
         } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
     }
+
 }

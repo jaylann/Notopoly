@@ -62,7 +62,10 @@ public class setupUI{
             else {
                 y=2;
             }
-            charClicked(figures.get((y+x)+(page*4)));
+            if ((y+x)+(page*4) < figures.size()){
+
+                charClicked(figures.get((y+x)+(page*4)));
+            }
         }
     };
 
@@ -82,11 +85,14 @@ public class setupUI{
                     bp.add(nextPageButton);
                     bp.add(lastPageButton);
 
+                    //TODO: Remove extra button if there is less than 4 on first page after removing char
+
                     players.add(new Player(8000, nameBox.getText(), chosenChar));
 
                     //Resetting values and removing chosenChar
                     figures.remove(chosenChar);
                     pages = (int) Math.ceil(figures.size()/4.0);
+                    page = 0;
                     chosenChar = null;
                     nameBox.setText("");
 
@@ -336,12 +342,6 @@ public class setupUI{
     private final Stroke innerStroke = new BasicStroke(4);
 
     public void draw(Graphics2D g2) {
-        //Enabling Anti-Aliasing and setting Priority to Render Quality
-        g2.setRenderingHint(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.setRenderingHint( RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY );
 
         g2.setFont(textFont);
 

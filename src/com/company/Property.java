@@ -16,9 +16,14 @@ abstract class Property {
         sellPrice = price;
     }
 
+    abstract void landOn(Player p);
+
+
+
+
     protected void pay(Player landedPlayer) throws noOwnerException, propertyMortgagedException {
         if (!mortgage && owner != null) {
-            landedPlayer.removeMoney(rent);
+            landedPlayer.removeMoney(rent, true);
             owner.addMoney(rent);
         }
         else if (mortgage) { throw new propertyMortgagedException(String.format("Cannot pay rent to mortgaged property: %s", name)); }
@@ -27,7 +32,7 @@ abstract class Property {
 
     protected void buy(Player buyer) throws alreadyOwnedException {
         if (owner == null) {
-            buyer.removeMoney(buyPrice);
+            buyer.removeMoney(buyPrice,false);
             changeOwner(buyer);
         }
         else { throw new alreadyOwnedException(String.format("Cannot buy already owned property: %s", name)); }
@@ -43,7 +48,7 @@ abstract class Property {
 
     protected void unmortgage() throws notMortgagedException {
         if (mortgage) {
-            owner.removeMoney((int) ((sellPrice/2)+(sellPrice+0.1)));
+            owner.removeMoney((int) ((sellPrice/2)+(sellPrice+0.1)), false);
             mortgage = false;
         }
         else { throw new notMortgagedException(String.format("Cannot unmortgage not mortgaged property: %s", name)); }
@@ -51,4 +56,11 @@ abstract class Property {
 
     protected void changeOwner(Player newOwner) { owner = newOwner; }
 
+    public int getBuyPrice() {
+        return buyPrice;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
