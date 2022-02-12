@@ -54,7 +54,14 @@ abstract class Property {
         else { throw new notMortgagedException(String.format("Cannot unmortgage not mortgaged property: %s", name)); }
     }
 
-    protected void changeOwner(Player newOwner) { owner = newOwner; }
+    protected boolean changeOwner(Player newOwner) {
+        if (owner == null) {
+            owner = newOwner;
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public int getBuyPrice() {
         return buyPrice;

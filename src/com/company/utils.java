@@ -12,4 +12,9 @@ public class utils {
         } catch (IOException e) { throw new RuntimeException("This file should always exist. Unless someone intentionally deleted it.",e); }
     }
 
+    public static int stringWidth(Graphics2D g2, String s) {
+        return g2.getFontMetrics().stringWidth(s);
+    }
+
+
 }

@@ -59,13 +59,11 @@ public class Board extends JPanel implements  Runnable{
     public Board(JFrame frame) {
         String[] nameList = {"Los", "Badstrasse", "Gemeinschaftsfeld", "Turmstrasse", "Einkommensteuer", "Südbahnhof",
                 "Chausseestrasse", "Ereignisfeld", "Elisenstrasse", "Poststrasse", "Gefängnis", "Seestrasse",
-                "Elektrizitätswerk", "Hafenstrasse", "Neue-Strasse", "Westbahnhof", "Muenchner-Strasse","Gemeinschaftsfeld",
+                "Elektrizitätswerk", "Hafenstrasse", "Neue-Strasse", "Westbahnhof", "Münchner-Strasse","Gemeinschaftsfeld",
                 "Wiener-Strasse","Berliner-Strasse", "Frei-Parken", "Theaterstrasse", "Ereignisfeld", "Museumstrasse","Opernplatz",
                 "Nordbahnhof", "Lessingstrasse", "Schillerstrasse", "Wasserwerk", "Goethestrasse", "Gehe-in-das-Gefängnis",
                 "Rathausplatz", "Hauptstrasse", "Gemeinschaftsfeld", "Bahnhofstrasse", "Hauptbahnhof", "Zusatzsteuer",
                 "Parkstrasse", "Ereignisfeld", "Schlossallee"};
-        int[] buyPriceList = {0,1200,0,1200,0,4000,2000,0,2000,2400,0,2800,3000,2800,3200,4000,3600,0,3600,4000,
-                                0,4400,0,4400,4800,4000,5200,5200,3000,5600,0,6000,6000,0,6400,4000,0,7000,0,8000};
         Color[] colorList = {new Color(156, 94, 50),new Color(97, 197, 255),new Color(255, 0, 234),new Color(255, 136, 0),new Color(255, 0, 0),new Color(255, 242, 0),new Color(0, 145,0),new Color(0, 6, 186)};
         int[] colorIndex = {0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7};
         int[] typeList = {6,0,2,0,5,1,0,3,0,0,7,0,4,0,0,1,0,2,0,0,8,0,3,0,0,1,0,0,4,0,9,0,0,2,0,1,5,0,3,0};
@@ -75,20 +73,21 @@ public class Board extends JPanel implements  Runnable{
         csvFile.remove(0);
         for (String[] s: csvFile) {
             Hashtable<String, Integer> tmpDict = new Hashtable<>();
-            System.out.println(Arrays.toString(s));
+            //System.out.println(Arrays.toString(s));
             for (int i = 1; i < s.length-1; i++) {
-
                 tmpDict.put(valueList.get(i-1),Integer.parseInt(s[i]));
-
-
             }
             streetDict.put(s[0], tmpDict);
         }
         this.setLayout(null);
         screenHeight = frame.getHeight();
         screenWidth = frame.getWidth();
+        System.out.println(screenHeight);
+        System.out.println(screenWidth);
         scaleFactor = frame.getWidth()/1080.0;
-        
+        System.out.println(scaleFactor);
+
+
         occupantWidth = (int) (60*scaleFactor);
         occupantHeight = (int) (60*scaleFactor);
         occupantFirstRowX = (int) (40*scaleFactor);
@@ -103,8 +102,8 @@ public class Board extends JPanel implements  Runnable{
         int z = 0;
         for (int i = 0; i < typeList.length; i++) {
             if (typeList[i] == 0) {
-                System.out.println(streetDict.get(nameList[i]));
-                System.out.println(i);
+                //System.out.println(streetDict.get(nameList[i]));
+                //System.out.println(i);
                 propertyList.add(new Street(nameList[i], streetDict.get(nameList[i]), ui, colorList[colorIndex[z]]));
                 z++;
             }
@@ -220,8 +219,8 @@ public class Board extends JPanel implements  Runnable{
                         }
                     }
                 } else {
-                    final int firstFieldColumn = (int) (150+(90*((i%10)-1))*scaleFactor);
-                    final int secondFieldColumn = (int) (210+(90*((i%10)-1))*scaleFactor);
+                    final int firstFieldColumn = (int) ((150+(90*((i%10)-1)))*scaleFactor);
+                    final int secondFieldColumn = (int) ((210+(90*((i%10)-1)))*scaleFactor);
 
                     if (corner < 1.0) {
                         x = secondFieldColumn;

@@ -1,5 +1,7 @@
 package com.company;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -48,12 +50,21 @@ public class UI {
         if (nextTurnAvailable) { nextTurn = true; }
     };
 
+
+    private final int diceY;
+    private final int diceFirstX;
+    private final int diceSecondX;
+
     public UI(Board bp) {
         this.bp = bp;
 
         screenHeight = bp.getScreenHeight();
         screenWidth = bp.getScreenWidth();
         scaleFactor = screenHeight/1080.0;
+
+        diceY= (int) (150*scaleFactor);
+        diceFirstX = (int) (175*scaleFactor);
+        diceSecondX= (int) (25*scaleFactor);
 
         setupui = new setupUI(this.bp,this);
 
@@ -75,6 +86,16 @@ public class UI {
                 (int) ((screenWidth/2)-180*scaleFactor),
                 (int) (screenHeight/1.35), nextListener);
         //TODO: Add different buttons
+    }
+
+    public void disableButtons(@NotNull ArrayList<JButton> btnList) {
+        for(JButton btn: btnList) {
+            bp.remove(btn);
+        }
+    }
+
+    public void disableButtons(@NotNull JButton btn) {
+        bp.remove(btn);
     }
 
     private ArrayList<Image> loadNumberImages(int width, int height, boolean golden) {
@@ -139,18 +160,20 @@ public class UI {
             secondDice = noDuplicateDice(rand.nextInt(1,7), secondDice);
         }
         //Draw both dice
-        g2.drawImage(imgNumbers.get(firstDice-1), screenWidth/2-175, 200, null);
-        g2.drawImage(imgNumbers.get(secondDice-1), screenWidth/2-25, 200, null);
+        g2.drawImage(imgNumbers.get(firstDice-1), screenWidth/2-diceFirstX, diceY, null);
+        g2.drawImage(imgNumbers.get(secondDice-1), screenWidth/2-diceSecondX, diceY, null);
         diceCounter += 1;
     }
 
+
+
     private void drawFinalDice(Graphics2D g2) {
         if (finalRoll[0] == finalRoll[1]) {
-            g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-175, 150, null);
-            g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-25, 150, null);
+            g2.drawImage(imgNumbersGolden.get(finalRoll[0]-1), screenWidth/2-diceFirstX, diceY, null);
+            g2.drawImage(imgNumbersGolden.get(finalRoll[1]-1), screenWidth/2-diceSecondX, diceY, null);
         } else {
-            g2.drawImage(imgNumbers.get(finalRoll[0]-1), screenWidth/2-175, 150, null);
-            g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-25, 150, null);
+            g2.drawImage(imgNumbers.get(finalRoll[0]-1), screenWidth/2-diceFirstX, diceY, null);
+            g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-diceSecondX, diceY, null);
         }
     }
 
@@ -202,6 +225,10 @@ public class UI {
         }
     }
 
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
     public void nextTurn(int turn) {
         //Go to next Player
         currentPlayer = playerList.get(turn);
@@ -247,6 +274,10 @@ public class UI {
         currentPlayer = pList.get(0);
     }
 
+    public void disableStreetInfo() {
+        disableButtons(streetInfo.getButtons());
+        streetInfo = null;
+    }
 
 
 }

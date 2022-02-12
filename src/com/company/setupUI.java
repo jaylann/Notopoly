@@ -85,8 +85,6 @@ public class setupUI{
                     bp.add(nextPageButton);
                     bp.add(lastPageButton);
 
-                    //TODO: Remove extra button if there is less than 4 on first page after removing char
-
                     players.add(new Player(8000, nameBox.getText(), chosenChar));
 
                     //Resetting values and removing chosenChar

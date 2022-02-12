@@ -7,7 +7,7 @@ import java.util.Random;
 public class Player {
     private int money;
     private int position = 0;
-    private ArrayList<Property> properties;
+    private ArrayList<Property> properties = new ArrayList<>();
     private final String name;
     private final Image character;
     private boolean bankrupt = false;
@@ -39,7 +39,7 @@ public class Player {
     }
 
     public boolean removeMoney(int amount, boolean forced) {
-        if (money-amount > 0 && !forced) {
+        if (money-amount >= 0 && !forced) {
             money -= amount;
             return true;
         } else if (forced) {
@@ -60,9 +60,12 @@ public class Player {
         this.prison = inPrison;
     }
 
-    public void buyProperty(int price, Property boughtProperty) {
+    public boolean buyProperty(int price, Property boughtProperty) {
         if (removeMoney(price, false)) {
             addProperty(boughtProperty);
+            return true;
+        } else {
+            return false;
         }
     }
     public void sellProperty(int price, Property soldProperty, Player buyer) {
@@ -72,8 +75,12 @@ public class Player {
         }
     }
     private void addProperty(Property property) {
-        properties.add(property);
-        property.changeOwner(this);
+        if (property.changeOwner(this)) {
+            properties.add(property);
+        } else {
+            addMoney(property.getBuyPrice());
+        }
+        System.out.println(properties);
     }
     private void removeProperty(Property property) {
         properties.remove(property);
