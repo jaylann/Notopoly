@@ -1,14 +1,16 @@
 package com.company;
 
-abstract class SpecialField {
+abstract class SpecialField extends Field {
 
     protected  Board bp;
     protected  UI parentUI;
-    public SpecialField(Board bp, UI parentUI) {
+    protected String name;
+    public SpecialField(Board bp, UI parentUI, String name) {
         this.bp = bp;
         this.parentUI = parentUI;
+        this.name = name;
     }
 
-    abstract void landOn(Player p);
+    public String getName() {return this.name;}
 
 }

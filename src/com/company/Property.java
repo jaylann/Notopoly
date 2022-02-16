@@ -2,7 +2,7 @@ package com.company;
 
 import com.company.exceptions.*;
 
-abstract class Property {
+abstract class Property extends Field{
     protected final int buyPrice;
     protected int sellPrice;
     protected Player owner = null;
@@ -10,24 +10,25 @@ abstract class Property {
     protected boolean mortgage = false;
     protected final String name;
 
+    protected boolean isMortgaged() {
+        return mortgage;
+    }
+
+
     protected Property(String sName, int price) {
         name = sName;
         buyPrice = price;
         sellPrice = price;
     }
 
-    abstract void landOn(Player p);
 
-
-
-
-    protected void pay(Player landedPlayer) throws noOwnerException, propertyMortgagedException {
+    protected void pay(Player landedPlayer, int payment) throws noOwnerException, propertyMortgagedException {
         if (!mortgage && owner != null) {
-            landedPlayer.removeMoney(rent, true);
-            owner.addMoney(rent);
+            int paidMoney = landedPlayer.removeMoney(payment, true);
+            owner.addMoney(paidMoney);
         }
         else if (mortgage) { throw new propertyMortgagedException(String.format("Cannot pay rent to mortgaged property: %s", name)); }
-        else if (owner == null) { throw new noOwnerException(String.format("Property: %s has no owner to pay rent to", name)); }
+        else { throw new noOwnerException(String.format("Property: %s has no owner to pay rent to", name)); }
     }
 
     protected void buy(Player buyer) throws alreadyOwnedException {
@@ -41,7 +42,7 @@ abstract class Property {
     protected void mortgage() throws alreadyMortgagedException, cannotMortgageHousedPropertyException {
         if (!mortgage) {
             mortgage = true;
-            owner.addMoney((int) sellPrice/2);
+            owner.addMoney(sellPrice /2);
         }
         else { throw new alreadyMortgagedException(String.format("Cannot mortgage already mortgaged property: %s", name)); }
     }
@@ -70,4 +71,6 @@ abstract class Property {
     public String getName() {
         return name;
     }
+
+
 }

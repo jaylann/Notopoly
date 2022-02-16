@@ -40,8 +40,13 @@ public class UI {
     private final ActionListener diceListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!displayDice){
-                finalRoll = currentPlayer.roll();
+            if (!displayDice || (currentPlayer.isDoublets() && diceCounter >= 50)){
+                diceCounter = 0;
+                if (hasMoved) {
+
+                    hasMoved = false;
+                }
+                finalRoll = currentPlayer.roll(bp);
                 displayDice = true;
             }
         }
@@ -68,6 +73,8 @@ public class UI {
 
         setupui = new setupUI(this.bp,this);
 
+        warningFont =  new Font("Roboto", Font.PLAIN, (int) (35 * scaleFactor));
+
         //Loading Images
         diceImage = utils.loadImage("images/dice.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
         nextTurnImage = utils.loadImage("images/nextTurnArrow.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
@@ -86,6 +93,7 @@ public class UI {
                 (int) ((screenWidth/2)-180*scaleFactor),
                 (int) (screenHeight/1.35), nextListener);
         //TODO: Add different buttons
+        hasMoved  =false;
     }
 
     public void disableButtons(@NotNull ArrayList<JButton> btnList) {
@@ -131,9 +139,9 @@ public class UI {
         return newButton;
     }
 
-    private StreetInfo streetInfo;
-    public void drawStreetInfo(StreetInfo info){
-        streetInfo = info;
+    private Info propertyInfo;
+    public void drawInfo(Info info){
+        propertyInfo = info;
     }
 
     //Generating first random numbers to display when rolling
@@ -206,21 +214,41 @@ public class UI {
                         (int) (100*scaleFactor),
                         null);
             }
+
             if (displayDice) {
                 if (diceCounter < 50) {
                    drawRandomDice(g2);
                 }
                 else {
                     //TODO: Change after adding the option to buy streets.
-                    if (!nextTurnAvailable) {
-                        nextTurnAvailable = true;
+                    if (!hasMoved) {
+                        hasMoved = true;
+                        if (!currentPlayer.isDoublets()) {
+                            nextTurnAvailable = true;
+                        }
+                        System.out.println("NEW");
+                        System.out.println(currentPlayer.getPosition());
                         currentPlayer.move(finalRoll[0]+finalRoll[1], bp);
+                        System.out.println(currentPlayer.getPosition());
+
                     }
                     drawFinalDice(g2);
                 }
             }
-            if (streetInfo != null) {
-                streetInfo.draw(g2);
+            if (propertyInfo != null) {
+                propertyInfo.draw(g2);
+            }
+            if(pInfo != null){
+                pInfo.draw(g2);
+            }
+            if (notEnoughMoney) {
+                notEnoughMoney = drawWarning(g2, "NICHT GENÜGEND GELD!");
+            }
+            if (noMonopolyWarning) {
+                noMonopolyWarning = drawWarning(g2, "SIE BESITZEN NICHT ALLE HÄUSER DIESER FARBE!");
+            }
+            if (propertyMortgagedWarning) {
+                propertyMortgagedWarning = drawWarning(g2, "AUF IHREM GRUNDSTÜCK LIEGT EINE HYPOTHEK!");
             }
         }
     }
@@ -228,17 +256,23 @@ public class UI {
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
-
+    private boolean hasMoved;
+    private PrisonInfo pInfo;
+    private boolean isInPrison;
     public void nextTurn(int turn) {
         //Go to next Player
         currentPlayer = playerList.get(turn);
-
+        pInfo = null;
         //Reset Values
         diceCounter = 0;
+        hasMoved = false;
         displayDice = false;
         nextTurn = false;
         nextTurnAvailable = false;
-        streetInfo = null;
+        propertyInfo = null;
+        if (currentPlayer.isInPrison()){
+            pInfo = new PrisonInfo((SpecialField) bp.getPropertyList(currentPlayer.getPosition()),this,bp,bp.getPrisonField().getPrice());
+        }
     }
 
     public void endSetup() {
@@ -274,10 +308,45 @@ public class UI {
         currentPlayer = pList.get(0);
     }
 
-    public void disableStreetInfo() {
-        disableButtons(streetInfo.getButtons());
-        streetInfo = null;
+    public void disableInfo() {
+        disableButtons(propertyInfo.getButtons());
+        propertyInfo = null;
+        pInfo = null;
     }
 
+    private boolean propertyMortgagedWarning = false;
+    public void drawMortgageWarning() {
+        propertyMortgagedWarning = true;
+        warningDrawCount = 0;
+    }
 
+    private final Font warningFont;
+    private int warningDrawCount = 0;
+    private boolean notEnoughMoney = false;
+    private boolean noMonopolyWarning = false;
+    public void notEnoughMoneyWarning() {
+        notEnoughMoney = true;
+        warningDrawCount = 0;
+    }
+    
+    private boolean drawWarning(Graphics2D g2, String warning) {
+        //Increasing transparency with each iteration
+        g2.setFont(warningFont);
+
+
+        g2.setColor(new Color(0, 0, 0, 255 - warningDrawCount));
+        g2.drawString(warning, (getWidth() / 2) - (utils.stringWidth(g2, warning) / 2), (getHeight()) / 2);
+        warningDrawCount += 1;
+        if (warningDrawCount > 255) {
+            warningDrawCount = 0;
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public void noMonopolyWarning() {
+        noMonopolyWarning = true;
+        warningDrawCount = 0;
+    }
 }

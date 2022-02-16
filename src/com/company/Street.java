@@ -1,9 +1,6 @@
 package com.company;
 
-import com.company.exceptions.alreadyMortgagedException;
-import com.company.exceptions.cannotMortgageHousedPropertyException;
-import com.company.exceptions.maxHousesPerPropertyReachedException;
-import com.company.exceptions.negativeHousesException;
+import com.company.exceptions.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -23,26 +20,31 @@ public class Street extends Property {
     private int rent;
     private final UI parentUI;
     private final Color color;
-
+    private final int maxStreets;
+    private final int propertyIndex;
 
     public Color getColor() {
         return color;
     }
 
-    public Street(String sName, int price, ArrayList<Integer> pay, int hPrice, UI pUI, Color streetColor) {
+    public Street(String sName, int price, ArrayList<Integer> pay, int hPrice, UI pUI, Color streetColor, int maxStreets, int propertyIndex) {
         super(sName,price);
         priceList = pay;
         housePrice = hPrice;
         parentUI = pUI;
         color = streetColor;
+        this.maxStreets = maxStreets;
+        this.propertyIndex = propertyIndex;
     }
 
-    public Street(String sName, Hashtable<String, Integer> values, UI pUI, Color streetColor) {
+    public Street(String sName, Hashtable<String, Integer> values, UI pUI, Color streetColor, int maxStreets, int propertyIndex) {
         super(sName, values.get("price"));
         housePrice = values.get("housePrice");
         priceList = new ArrayList<>(Arrays.asList(values.get("rent0"),values.get("rent1"),values.get("rent2"),values.get("rent3"),values.get("rent4"),values.get("rent5")));
         parentUI = pUI;
         color = streetColor;
+        this.maxStreets = maxStreets;
+        this.propertyIndex = propertyIndex;
     }
 
     public int getHousePrice() {
@@ -53,38 +55,79 @@ public class Street extends Property {
     protected void mortgage() throws alreadyMortgagedException, cannotMortgageHousedPropertyException {
         if (!mortgage && houses == 0) {
             mortgage = true;
-            owner.addMoney((int) sellPrice/2);
+            owner.addMoney(sellPrice /2);
         }
         else if (mortgage) { throw new alreadyMortgagedException(String.format("Cannot mortgage already mortgaged property: %s", name)); }
         else if (houses > 0) { throw new cannotMortgageHousedPropertyException(String.format("Cannot mortgage property: %s that contains: %d houses ", name, houses)); }
     }
 
     public void buildHouse(int amount) throws maxHousesPerPropertyReachedException {
-        if (houses + amount < 5) {
-            houses += amount;
-            owner.removeMoney(amount*housePrice, false);
-            rent = priceList.get(houses);
+        if(monopolyCheck()) {
+            if (houses + amount <= 5) {
+                if (owner.removeMoney(amount*housePrice)) {
+                    houses += amount;
+                    rent = priceList.get(houses);
+                } else {
+                    parentUI.notEnoughMoneyWarning();
+                }
+            }
+            else { throw new maxHousesPerPropertyReachedException(String.format("Amount of houses on Street '%s' exceeds maximum of 5", name)
+            ); }
         }
-        else { throw new maxHousesPerPropertyReachedException(String.format("Amount of houses on Street '%s' exceeds maximum of 5", name)
-        ); }
+        else {
+            parentUI.noMonopolyWarning();
+        }
 
     }
+
     public void sellHouse(int amount) throws negativeHousesException {
-        if (houses - amount > 0) {
+        if (houses - amount >= 0) {
             houses -= amount;
             owner.addMoney(amount*(housePrice/2));
             rent = priceList.get(houses);
         }
         else { throw new negativeHousesException(String.format("%d is not a valid Value for amount of houses for property: %s", houses-amount, name)); }
-
     }
+
+    private boolean monopolyCheck() {
+        if (getBlock().size() == maxStreets) {
+            monopoly = true;
+        } else {
+            monopoly = false;
+        }
+        return monopoly;
+    }
+
+    private ArrayList<Street> getBlock() {
+        ArrayList<Street> blockList = new ArrayList<>();
+        for(Property prop: owner.getProperties()) {
+            if (prop.getClass() == Street.class) {
+                if (((Street) prop).getColor() == this.color) {
+                    blockList.add((Street) prop);
+                }
+            }
+        }
+        return blockList;
+    }
+
     public void landOn(Player p) {
         if (!p.equals(owner) && owner != null) {
-            p.removeMoney(rent, true);
-            owner.addMoney(rent);
+
+            int payment = rent;
+            if (monopolyCheck()) {
+                payment = 2*rent;
+            }
+
+            try {
+                pay(p, payment);
+            } catch (noOwnerException e) {
+                e.printStackTrace();
+            } catch (propertyMortgagedException e) {
+                parentUI.drawMortgageWarning();
+            }
         } else if (owner == null) {
             StreetInfo streetInfo = new StreetInfo(this, parentUI);
-            parentUI.drawStreetInfo(streetInfo);
+            parentUI.drawInfo(streetInfo);
         }
     }
 

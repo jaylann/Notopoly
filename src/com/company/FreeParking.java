@@ -1,8 +1,8 @@
 package com.company;
 
 public class FreeParking extends SpecialField{
-    public FreeParking(Board bp, UI parentUI) {
-        super(bp, parentUI);
+    public FreeParking(Board bp, UI parentUI, String name) {
+        super(bp, parentUI, name);
     }
 
     @Override

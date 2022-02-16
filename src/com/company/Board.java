@@ -27,7 +27,7 @@ public class Board extends JPanel implements  Runnable{
     private int turn;
     private int middleMoney = 0;
 
-    private ArrayList<Property> propertyList = new ArrayList<>();
+    private final ArrayList<Field> propertyList = new ArrayList<>();
 
     private final double scaleFactor;
 
@@ -59,7 +59,7 @@ public class Board extends JPanel implements  Runnable{
     public Board(JFrame frame) {
         String[] nameList = {"Los", "Badstrasse", "Gemeinschaftsfeld", "Turmstrasse", "Einkommensteuer", "Südbahnhof",
                 "Chausseestrasse", "Ereignisfeld", "Elisenstrasse", "Poststrasse", "Gefängnis", "Seestrasse",
-                "Elektrizitätswerk", "Hafenstrasse", "Neue-Strasse", "Westbahnhof", "Münchner-Strasse","Gemeinschaftsfeld",
+                "Elektrizitätswerk", "Hafenstrasse", "Neue-Strasse", "Westbahnhof", "Muenchner-Strasse","Gemeinschaftsfeld",
                 "Wiener-Strasse","Berliner-Strasse", "Frei-Parken", "Theaterstrasse", "Ereignisfeld", "Museumstrasse","Opernplatz",
                 "Nordbahnhof", "Lessingstrasse", "Schillerstrasse", "Wasserwerk", "Goethestrasse", "Gehe-in-das-Gefängnis",
                 "Rathausplatz", "Hauptstrasse", "Gemeinschaftsfeld", "Bahnhofstrasse", "Hauptbahnhof", "Zusatzsteuer",
@@ -68,12 +68,12 @@ public class Board extends JPanel implements  Runnable{
         int[] colorIndex = {0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7};
         int[] typeList = {6,0,2,0,5,1,0,3,0,0,7,0,4,0,0,1,0,2,0,0,8,0,3,0,0,1,0,0,4,0,9,0,0,2,0,1,5,0,3,0};
         Hashtable<String, Hashtable<String, Integer>> streetDict = new Hashtable<>();
-        ArrayList<String> valueList = new ArrayList<>(Arrays.asList("price", "housePrice", "rent0", "rent1", "rent2", "rent3", "rent4", "rent5"));;
+        ArrayList<String> valueList = new ArrayList<>(Arrays.asList("price", "housePrice", "rent0", "rent1", "rent2", "rent3", "rent4", "rent5"));
         ArrayList<String[]> csvFile = loadStreets();
         csvFile.remove(0);
         for (String[] s: csvFile) {
             Hashtable<String, Integer> tmpDict = new Hashtable<>();
-            //System.out.println(Arrays.toString(s));
+            System.out.println(Arrays.toString(s));
             for (int i = 1; i < s.length-1; i++) {
                 tmpDict.put(valueList.get(i-1),Integer.parseInt(s[i]));
             }
@@ -102,10 +102,32 @@ public class Board extends JPanel implements  Runnable{
         int z = 0;
         for (int i = 0; i < typeList.length; i++) {
             if (typeList[i] == 0) {
-                //System.out.println(streetDict.get(nameList[i]));
-                //System.out.println(i);
-                propertyList.add(new Street(nameList[i], streetDict.get(nameList[i]), ui, colorList[colorIndex[z]]));
+                int maxStreets;
+                if (nameList[i].equals("Schlossallee") || nameList[i].equals("Parkstrasse") || nameList[i].equals("Badstrasse") || nameList[i].equals("Turmstrasse")) {
+                    maxStreets = 2;
+                } else {maxStreets=3;}
+                propertyList.add(new Street(nameList[i], streetDict.get(nameList[i]), ui, colorList[colorIndex[z]], maxStreets, colorIndex[z]));
                 z++;
+            } else if (typeList[i] == 1) {
+                propertyList.add(new TrainStation(nameList[i], 4000, 500, ui));
+            } else if (typeList[i] == 4) {
+                propertyList.add(new UtilityCompany(nameList[i], 3000,ui));
+            } else if (typeList[i] == 5) {
+                if (i < 10) {
+                    propertyList.add(new TaxField(this, ui,nameList[i], 4000));
+                } else {
+                    propertyList.add(new TaxField(this, ui, nameList[i], 2000));
+                }
+            } else if (typeList[i] == 9) {
+                propertyList.add(new GoToJail(this,ui, "Gehe in das Gefängnis"));
+            } else if (typeList[i] == 7) {
+                propertyList.add(new Prison(this,ui,"Im Gefängnis",500));
+            } else if (typeList[i] == 6) {
+                propertyList.add(new Go(this,ui,"Los"));
+            } else if (typeList[i] == 8) {
+                propertyList.add(new FreeParking(this,ui,"Frei Parken"));
+            } else if (typeList[i] == 2) {
+                propertyList.add(new CommunityField(this,ui,"Gemeinschaftsfeld"));
             }
             else {
                 propertyList.add(null);
@@ -113,8 +135,16 @@ public class Board extends JPanel implements  Runnable{
         }
     }
 
-    private ArrayList<Property> createBoard() {
+    public Prison getPrisonField() {
+        return (Prison) propertyList.get(10);
+    }
 
+
+    public ArrayList<Player> getPlayerList() {
+        return playerList;
+    }
+
+    private ArrayList<Property> createBoard() {
         return null;
     }
 
@@ -136,11 +166,11 @@ public class Board extends JPanel implements  Runnable{
     public int getMiddleMoney() {
         return middleMoney;
     }
-    public void setMiddleMoney(int money) {
-        middleMoney = money;
+    public void setMiddleMoney(int amount) {
+        middleMoney = amount;
     }
-    public void addMiddleMoney(int money) {
-        middleMoney += money;
+    public void addMiddleMoney(int amount) {
+        middleMoney += amount;
     }
 
 
@@ -247,7 +277,7 @@ public class Board extends JPanel implements  Runnable{
                         }
                         g2.drawImage(occupants.get(j).getCharacter(), x, getScreenHeight()-y,occupantWidth,occupantHeight,null);
                     } else if (corner < 3.0 ) {
-                        x = (int) firstFieldColumn;
+                        x = firstFieldColumn;
                         if (occupants.size() > 1) {
                             if (j%2==0) {
                                 y = 0;
@@ -344,7 +374,7 @@ public class Board extends JPanel implements  Runnable{
 
     }
 
-    public Property getPropertyList(int position) {
+    public Field getPropertyList(int position) {
         return propertyList.get(position);
     }
 }
