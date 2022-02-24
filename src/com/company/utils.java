@@ -16,5 +16,24 @@ public class utils {
         return g2.getFontMetrics().stringWidth(s);
     }
 
+    public static Font getFittingFont(Graphics2D g2, String s, Font f, int width) {
+        String fontName = f.getFontName();
+        int fontSize = f.getSize();
+        int fontStyle = f.getStyle();
+        boolean found = false;
+        Font testFont = f;
+        while (!found) {
+
+            g2.setFont(testFont);
+            if (stringWidth(g2,s) <= width) {
+                found = true;
+            } else {
+                fontSize--;
+                testFont = new Font(fontName,fontStyle,fontSize);
+            }
+
+        }
+        return testFont;
+    }
 
 }

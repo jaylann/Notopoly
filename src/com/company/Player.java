@@ -2,6 +2,7 @@ package com.company;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Random;
 
 public class Player {
@@ -20,6 +21,11 @@ public class Player {
         money = startMoney;
         name = playerName;
         character = playerCharacter;
+        money = 50000;
+    }
+
+    public int getTimeInPrison() {
+        return timeInPrison;
     }
 
     public int getRecentRoll() {
@@ -28,12 +34,18 @@ public class Player {
 
     public boolean doublets = false;
 
+    public void setRecentRoll(int number) {
+        recentRoll = number;
+    }
+
+
     public int[] roll(Board bp) {
 
         int firstDice = rand.nextInt(1, 7);
         int secondDice = rand.nextInt(1, 7);
         System.out.println("Name: " + name);
         System.out.println("First dice: " + firstDice + "    Second dice: " + secondDice);
+
         if (firstDice == secondDice) {
             doublets = true;
             doubletCount++;
@@ -45,8 +57,8 @@ public class Player {
             doubletCount = 0;
         }
         if(timeInPrison >= 3) {
-            setPrison(false);
             payMiddle(bp.getPrisonField().getPrice(),bp, true);
+            setPrison(false);
         }
         if (doubletCount>=3) {
             setPrison(true);
@@ -61,6 +73,25 @@ public class Player {
 
     public ArrayList<Property> getProperties() {
         return properties;
+    }
+
+    public Hashtable<Integer, ArrayList<Property>>getPropertiesSorted() {
+        Hashtable<Integer, ArrayList<Property>> sortedPropertyList = new Hashtable<>();
+        ArrayList<Integer> scannedIDs = new ArrayList<>();
+        ArrayList<Property> tmpList = new ArrayList<>();
+        for (Property p: properties) {
+            if (!scannedIDs.contains(p.getID())) {
+                for (Property scanProp: properties) {
+                    if (scanProp.getID() == p.getID()) {
+                        tmpList.add(scanProp);
+                    }
+                }
+                scannedIDs.add(p.getID());
+                sortedPropertyList.put(p.getID(), tmpList);
+                tmpList = new ArrayList<>();
+            }
+        }
+        return sortedPropertyList;
     }
     public void move(int fields, Board bp) {
 
@@ -77,8 +108,11 @@ public class Player {
         } else {
             timeInPrison++;
         }
-
+        System.out.println(this.money);
     }
+
+    public String getName() {return name;}
+
     public void landOn(Field landed) {
         landed.landOn(this);
     }
@@ -104,8 +138,8 @@ public class Player {
     }
 
     public boolean removeMoney(int amount) {
-        if (money - amount >= 0) {
-            money -= amount;
+        if ((money - amount) >= 0) {
+            money = money - amount;
             return true;
         } else {
             return false;
@@ -118,18 +152,32 @@ public class Player {
 
     public void setPrison(boolean inPrison) {
         this.prison = inPrison;
+        doublets = false;
+        doubletCount = 0;
         if (inPrison) {
             this.position = 10;
         }
     }
 
-    public boolean buyProperty(int price, Property boughtProperty) {
-        if (removeMoney(price)) {
+    public boolean buyProperty(Property boughtProperty) {
+        if (removeMoney(boughtProperty.getBuyPrice())) {
             addProperty(boughtProperty);
+            System.out.println("BOUGHT: " + boughtProperty.getName());
             return true;
         } else {
+            System.out.println("DID NOT BUY");
             return false;
         }
+    }
+
+    public ArrayList<Street> getStreets() {
+        ArrayList<Street> tmpList = new ArrayList<>();
+        for (Property p: properties) {
+            if (p.getClass() == Street.class) {
+                tmpList.add((Street) p);
+            }
+        }
+        return tmpList;
     }
 
     public void sellProperty(int price, Property soldProperty, Player buyer) {
@@ -171,7 +219,7 @@ public class Player {
         return paidMoney == amount || forced;
 
     }
-    public boolean isInPrison(){return prison;}
+    public boolean isInPrison(){return this.prison;}
 
     private int prisonFreeCards=0;
 

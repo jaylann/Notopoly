@@ -10,8 +10,8 @@ public class UtilityCompany extends Property{
     private int multiplier;
     private final UI parentUI;
 
-    protected UtilityCompany(String sName, int price, UI parentUI) {
-        super(sName, price);
+    protected UtilityCompany(String sName, int price, UI parentUI, int index) {
+        super(sName, price, index);
         this.parentUI = parentUI;
     }
 
@@ -43,7 +43,9 @@ public class UtilityCompany extends Property{
         }
     }
 
-    private ArrayList<UtilityCompany> getOwnedUtilityCompanies() {
+
+
+    public ArrayList<UtilityCompany> getOwnedUtilityCompanies() {
         ArrayList<UtilityCompany> blockList = new ArrayList<>();
         for(Property prop: owner.getProperties()) {
             if (prop.getClass() == UtilityCompany.class && !prop.isMortgaged()) {

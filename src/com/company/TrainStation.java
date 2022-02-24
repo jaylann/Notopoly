@@ -15,9 +15,12 @@ public class TrainStation extends Property{
     public int getRent() {
         return rent;
     }
+    public int getCurrentRent() {
+        return rent*getMultiplier();
+    }
 
-    protected TrainStation(String sName, int price, int rent, UI parentUI) {
-        super(sName, price);
+    protected TrainStation(String sName, int price, int rent, UI parentUI, int index) {
+        super(sName, price, index);
         this.rent = rent;
         this.parentUI = parentUI;
     }
@@ -26,7 +29,7 @@ public class TrainStation extends Property{
         multiplier = (int) Math.pow(2,getOwnedTrainStations().size());
         return multiplier;
     }
-    private ArrayList<TrainStation> getOwnedTrainStations() {
+    public ArrayList<TrainStation> getOwnedTrainStations() {
         ArrayList<TrainStation> blockList = new ArrayList<>();
         for(Property prop: owner.getProperties()) {
             if (prop.getClass() == TrainStation.class && !prop.isMortgaged()) {

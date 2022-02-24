@@ -2,6 +2,8 @@ package com.company;
 
 import com.company.exceptions.*;
 
+import java.util.Objects;
+
 abstract class Property extends Field{
     protected final int buyPrice;
     protected int sellPrice;
@@ -13,12 +15,17 @@ abstract class Property extends Field{
     protected boolean isMortgaged() {
         return mortgage;
     }
+    protected final int ID;
 
+    public int getID() {
+        return ID;
+    }
 
-    protected Property(String sName, int price) {
+    protected Property(String sName, int price, int id) {
         name = sName;
         buyPrice = price;
         sellPrice = price;
+        this.ID = id;
     }
 
 
@@ -37,6 +44,10 @@ abstract class Property extends Field{
             changeOwner(buyer);
         }
         else { throw new alreadyOwnedException(String.format("Cannot buy already owned property: %s", name)); }
+    }
+
+    public Player getOwner() {
+        return owner;
     }
 
     protected void mortgage() throws alreadyMortgagedException, cannotMortgageHousedPropertyException {

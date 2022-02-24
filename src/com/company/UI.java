@@ -7,14 +7,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class UI {
 
     private final Board bp;
 
-    private final JButton rollButton;
-    private final JButton nextButton;
+    private JButton rollButton;
+    private JButton nextButton;
 
     private final setupUI setupui;
     private boolean setup = true;
@@ -42,8 +43,8 @@ public class UI {
         public void actionPerformed(ActionEvent e) {
             if (!displayDice || (currentPlayer.isDoublets() && diceCounter >= 50)){
                 diceCounter = 0;
+                disableInfo();
                 if (hasMoved) {
-
                     hasMoved = false;
                 }
                 finalRoll = currentPlayer.roll(bp);
@@ -51,15 +52,75 @@ public class UI {
             }
         }
     };
+
+    private Inventory inventory;
+
+    private final ActionListener inventoryListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (inventory == null) {
+                inventory = new Inventory(currentPlayer,bp,ui);
+            } else {
+                inventory = null;
+            }
+        }
+    };
+    private final ActionListener playerStatListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (inventory == null) {
+                inventory = new Inventory(currentPlayer,bp,ui);
+            } else {
+                inventory = null;
+            }
+        }
+    };
+    private final ActionListener propertyInfoListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (propertyInfo == null) {
+                if (bp.getPropertyList(currentPlayer.getPosition()) instanceof Property thisProperty) {
+                    if (thisProperty instanceof Street) {
+                        if (hasMoved) {
+                            propertyInfo = new StreetInfo((Street) thisProperty,ui, currentPlayer, true);
+                        } else {
+                            propertyInfo = new StreetInfo((Street) thisProperty,ui, currentPlayer, false);
+                        }
+                    } else if (thisProperty instanceof TrainStation) {
+                        if (hasMoved) {
+                            propertyInfo = new TrainInfo((TrainStation) thisProperty, ui, currentPlayer, true);
+                        } else {
+                            propertyInfo = new TrainInfo((TrainStation) thisProperty, ui, currentPlayer, false);
+                        }
+                    } else if (thisProperty instanceof UtilityCompany) {
+                        if (hasMoved) {
+                            propertyInfo = new UtilityInfo((UtilityCompany) thisProperty,ui, currentPlayer,true);
+                        } else {
+                            propertyInfo = new UtilityInfo((UtilityCompany) thisProperty,ui, currentPlayer,false);
+                        }
+                    }
+                } else if (bp.getPropertyList(currentPlayer.getPosition()) instanceof Prison thisProperty && currentPlayer.isInPrison()) {
+                    System.out.println("Prison");
+                    pInfo = new PrisonInfo(thisProperty, ui, bp, bp.getPrisonField().getPrice());
+                }
+
+
+            } else {
+                disableInfo();
+            }
+        }
+    };
     private final ActionListener nextListener = e -> {
-        if (nextTurnAvailable) { nextTurn = true; }
+        if (nextTurnAvailable) {
+            nextTurn = true;
+        }
     };
 
-
+    private final UI ui = this;
     private final int diceY;
     private final int diceFirstX;
     private final int diceSecondX;
-
+    private final Image propertyInfoImage;
     public UI(Board bp) {
         this.bp = bp;
 
@@ -81,20 +142,16 @@ public class UI {
         nextTurnImageGrey = utils.loadImage("images/nextTurnArrowGrey.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
         imgNumbers = loadNumberImages((int) (200*scaleFactor),(int) (200*scaleFactor), false);
         imgNumbersGolden = loadNumberImages((int) (200*scaleFactor), (int) (200*scaleFactor), true);
+        inventoryImage = utils.loadImage("images/inventory.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
+        propertyInfoImage = utils.loadImage("images/streetinfo.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
 
-        //Creating Buttons
-        rollButton = createButton((int) (100*scaleFactor),
-                (int) (100*scaleFactor),
-                (int) ((screenWidth/2)-60*scaleFactor),
-                (int) (screenHeight/1.35),
-                diceListener);
-        nextButton = createButton((int) (100*scaleFactor),
-                (int) (100*scaleFactor),
-                (int) ((screenWidth/2)-180*scaleFactor),
-                (int) (screenHeight/1.35), nextListener);
-        //TODO: Add different buttons
+
+
         hasMoved  =false;
     }
+    private JButton inventoryButton;
+    private JButton propertyInfoButton;
+    private final Image inventoryImage;
 
     public void disableButtons(@NotNull ArrayList<JButton> btnList) {
         for(JButton btn: btnList) {
@@ -197,6 +254,12 @@ public class UI {
                     (int) (100*scaleFactor),
                     (int) (100*scaleFactor),
                     null);
+            g2.drawImage(inventoryImage,
+                    (int) ((screenWidth/2)+((180*scaleFactor)/2)),
+                    (int) (screenHeight/1.3),
+                    (int) (100*scaleFactor),
+                    (int) (100*scaleFactor),
+                    null);
             if (nextTurnAvailable) {
                 //Draw image to click on to end your turn if its available
                 g2.drawImage(nextTurnImage,
@@ -214,6 +277,14 @@ public class UI {
                         (int) (100*scaleFactor),
                         null);
             }
+            if (bp.getPropertyList(currentPlayer.getPosition()) instanceof Property  || (bp.getPropertyList(currentPlayer.getPosition()) instanceof Prison && currentPlayer.isInPrison()) && hasMoved) {
+                g2.drawImage(propertyInfoImage,
+                        (int) ((screenWidth/2)+285*scaleFactor),
+                        (int) (screenHeight/1.3),
+                        (int) (100*scaleFactor),
+                        (int) (100*scaleFactor),
+                        null);
+            }
 
             if (displayDice) {
                 if (diceCounter < 50) {
@@ -222,14 +293,19 @@ public class UI {
                 else {
                     //TODO: Change after adding the option to buy streets.
                     if (!hasMoved) {
+                        if (currentPlayer.isDoublets()) {
+                            if (pInfo != null) {
+                                disableInfo();
+                            }
+                        }
+                        currentPlayer.move(finalRoll[0]+finalRoll[1], bp);
                         hasMoved = true;
                         if (!currentPlayer.isDoublets()) {
-                            nextTurnAvailable = true;
+                            System.out.println(actionInfo);
+                            if (actionInfo == null) {
+                                nextTurnAvailable = true;
+                            }
                         }
-                        System.out.println("NEW");
-                        System.out.println(currentPlayer.getPosition());
-                        currentPlayer.move(finalRoll[0]+finalRoll[1], bp);
-                        System.out.println(currentPlayer.getPosition());
 
                     }
                     drawFinalDice(g2);
@@ -250,7 +326,24 @@ public class UI {
             if (propertyMortgagedWarning) {
                 propertyMortgagedWarning = drawWarning(g2, "AUF IHREM GRUNDSTÜCK LIEGT EINE HYPOTHEK!");
             }
+            if(housesWarning) {
+                housesWarning = drawWarning(g2, "AUF IHREM GRUNDSTÜCK STEHEN NOCH HÄUSER!");
+            }
+            if (prisonWarning) {
+                prisonWarning = drawWarning(g2, "SIE KÖNNEN SICH ERST NÄCHSTE RUNDE BEFREIEN!");
+            }
+            if(actionInfo != null) {
+                actionInfo.draw(g2);
+            }
+            if(inventory != null) {
+                disableButtons(getButtons());
+                inventory.draw(g2);
+            }
         }
+    }
+
+    private ArrayList<JButton> getButtons() {
+        return new ArrayList<>(Arrays.asList(rollButton, nextButton, inventoryButton, propertyInfoButton));
     }
 
     public Player getCurrentPlayer() {
@@ -261,27 +354,62 @@ public class UI {
     private boolean isInPrison;
     public void nextTurn(int turn) {
         //Go to next Player
-        currentPlayer = playerList.get(turn);
-        pInfo = null;
+        currentPlayer.setRecentRoll(0);
+
+        disableInfo();
         //Reset Values
         diceCounter = 0;
         hasMoved = false;
         displayDice = false;
         nextTurn = false;
         nextTurnAvailable = false;
-        propertyInfo = null;
+        currentPlayer = playerList.get(turn);
         if (currentPlayer.isInPrison()){
             pInfo = new PrisonInfo((SpecialField) bp.getPropertyList(currentPlayer.getPosition()),this,bp,bp.getPrisonField().getPrice());
         }
     }
 
+    public void closeInventory() {
+        if (inventory != null) {
+            disableButtons(inventory.getButtons());
+            inventory = null;
+            for (JButton btn: getButtons()){
+                bp.add(btn);
+            }
+        }
+    }
+
     public void endSetup() {
         setup=false;
+        //Creating Buttons
+        rollButton = createButton((int) (100*scaleFactor),
+                (int) (100*scaleFactor),
+                (int) ((screenWidth/2)-60*scaleFactor),
+                (int) (screenHeight/1.3),
+                diceListener);
+        nextButton = createButton((int) (100*scaleFactor),
+                (int) (100*scaleFactor),
+                (int) ((screenWidth/2)-180*scaleFactor),
+                (int) (screenHeight/1.3), nextListener);
+        //TODO: Add different buttons
+        inventoryButton = createButton((int) (100*scaleFactor),
+                (int) (100*scaleFactor),
+                (int) ((screenWidth/2)+60*scaleFactor),
+                (int) (screenHeight/1.3), inventoryListener);
+        propertyInfoButton = createButton((int) (100*scaleFactor),
+                (int) (100*scaleFactor),
+                (int) ((screenWidth/2)+285*scaleFactor),
+                (int) (screenHeight/1.3), propertyInfoListener);
+
     }
 
     public void dispose() {
         bp.remove(rollButton);
         rollButton.removeActionListener(diceListener);
+    }
+
+    public void setNextTurnAvailable(boolean nextTurnAvailable) {
+        this.nextTurnAvailable = nextTurnAvailable;
     }
 
     //Getters / Setters
@@ -309,9 +437,16 @@ public class UI {
     }
 
     public void disableInfo() {
-        disableButtons(propertyInfo.getButtons());
-        propertyInfo = null;
-        pInfo = null;
+        if (propertyInfo != null) {
+            disableButtons(propertyInfo.getButtons());
+            propertyInfo = null;
+        } else if (pInfo != null) {
+            disableButtons(pInfo.getButtons());
+            pInfo = null;
+        } else if (actionInfo != null) {
+            disableButtons(actionInfo.getButtons());
+            actionInfo = null;
+        }
     }
 
     private boolean propertyMortgagedWarning = false;
@@ -324,6 +459,7 @@ public class UI {
     private int warningDrawCount = 0;
     private boolean notEnoughMoney = false;
     private boolean noMonopolyWarning = false;
+    private boolean housesWarning = false;
     public void notEnoughMoneyWarning() {
         notEnoughMoney = true;
         warningDrawCount = 0;
@@ -347,6 +483,21 @@ public class UI {
 
     public void noMonopolyWarning() {
         noMonopolyWarning = true;
+        warningDrawCount = 0;
+    }
+
+    private ActionInfo actionInfo = null;
+    public void setActionInfo(ActionInfo actionInfo) {
+        this.actionInfo = actionInfo;
+    }
+
+    public void drawHousesWarning() {
+        housesWarning = true;
+        warningDrawCount = 0;
+    }
+    private boolean prisonWarning = false;
+    public void prisonWarning() {
+        prisonWarning = true;
         warningDrawCount = 0;
     }
 }

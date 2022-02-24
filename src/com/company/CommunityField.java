@@ -7,6 +7,7 @@ public class CommunityField extends SpecialField{
 
     @Override
     void landOn(Player p) {
-        ActionCard action = new CommunityAction(bp,parentUI,p);
+
+        ActionCard action = new CommunityAction(bp,parentUI,p,this);
     }
 }

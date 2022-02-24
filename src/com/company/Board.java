@@ -109,9 +109,9 @@ public class Board extends JPanel implements  Runnable{
                 propertyList.add(new Street(nameList[i], streetDict.get(nameList[i]), ui, colorList[colorIndex[z]], maxStreets, colorIndex[z]));
                 z++;
             } else if (typeList[i] == 1) {
-                propertyList.add(new TrainStation(nameList[i], 4000, 500, ui));
+                propertyList.add(new TrainStation(nameList[i], 4000, 500, ui,8));
             } else if (typeList[i] == 4) {
-                propertyList.add(new UtilityCompany(nameList[i], 3000,ui));
+                propertyList.add(new UtilityCompany(nameList[i], 3000,ui,9));
             } else if (typeList[i] == 5) {
                 if (i < 10) {
                     propertyList.add(new TaxField(this, ui,nameList[i], 4000));
@@ -128,6 +128,8 @@ public class Board extends JPanel implements  Runnable{
                 propertyList.add(new FreeParking(this,ui,"Frei Parken"));
             } else if (typeList[i] == 2) {
                 propertyList.add(new CommunityField(this,ui,"Gemeinschaftsfeld"));
+            } else if (typeList[i] == 3) {
+                propertyList.add(new ChanceField(this,ui,"Ereignisfeld"));
             }
             else {
                 propertyList.add(null);

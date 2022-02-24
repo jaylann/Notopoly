@@ -1,74 +1,41 @@
 package com.company;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 
 public class CommunityAction extends ActionCard{
 
-    private final ArrayList<Action> actionList;
-    private final Random random = new Random();
-
-    public CommunityAction(Board bp, UI parentUI, Player p) {
-        super(bp, parentUI, p);
+    public CommunityAction(Board bp, UI parentUI, Player p, SpecialField caller) {
+        super(bp, parentUI, p, caller);
         actionList = new ArrayList<>(Arrays.asList(new AdvanceToGo(), new Birthday(), new StockPayout(),
                 new IncomeTaxReward(), new PrisonFree(), new Insurance(), new BackToStart(), new PayOrChance(),
                 new BeautyContest(), new Hospital(), new Doctor(), new GarageSale(), new Pension(), new GoToPrison(),
                 new Inheritance(), new BankError()));
-        showCard(getRandomAction());
+        Action newAction = getRandomAction();
+        showCard(newAction);
+
     }
 
-    public Action getRandomAction() {
+    public CommunityAction.Action getRandomAction() {
         return actionList.get(random.nextInt(0, actionList.size()));
     }
 
-    public Player getPlayer() {
-        return targetPlayer;
-    }
-
-
-    public UI getUI() {
-        return parentUI;
-    }
-
-    public Board getBoard() {
-        return bp;
-    }
-
     public void showCard(Action action) {
-        System.out.println(action.getTitle());
-        System.out.println(action.getInfoText());
+        parentUI.setActionInfo(new ActionInfo(caller,parentUI,action));
     }
 
-    protected abstract class Action {
-        protected final String title;
-        protected final String infoText;
 
-        public Action(String action,String infoText) {
-            this.title = action;
-            this.infoText = infoText;
-        }
-
-
-
-        abstract void execute();
-        protected String getTitle() {
-            return this.title;
-        }
-        protected String getInfoText() {
-            return this.infoText;
-        }
-
-
-    }
     protected class AdvanceToGo extends Action {
         public AdvanceToGo() {
             super("Rücken sie vor auf", "Los.");
         }
         protected void execute() {
             targetPlayer.setPosition(0);
-            targetPlayer.landOn(bp.getPropertyList(targetPlayer.getPosition()));
+            parentUI.disableInfo();
+            targetPlayer.landOn(bp.getPropertyList(0));
         }
     }
 
@@ -81,6 +48,7 @@ public class CommunityAction extends ActionCard{
             int payedMoney;
             for (Player p: bp.getPlayerList()) {
                 if (!p.equals(targetPlayer)) {
+                    System.out.println(String.format("REMOVED %d€ from PLAYER: %s", cost,p.getName()));
                     payedMoney = p.removeMoney(cost,true);
                     targetPlayer.addMoney(payedMoney);
                 }
@@ -107,7 +75,7 @@ public class CommunityAction extends ActionCard{
     }
     protected class PrisonFree extends Action {
         public PrisonFree() {
-            super("Du kommst aus dem Gefängnis frei.", "Diese Karte muß behalten werden, bis sie gebraucht oder verkauft wird.");
+            super("Du kommst aus dem Gefängnis frei.", "Diese Karte muss behalten werden, bis sie gebraucht oder verkauft wird.");
         }
         protected void execute() {
             targetPlayer.addPrisonFree();
@@ -128,18 +96,30 @@ public class CommunityAction extends ActionCard{
         }
         protected void execute() {
             targetPlayer.setPosition(3);
+            parentUI.disableInfo();
             targetPlayer.landOn(bp.getPropertyList(3));
         }
     }
     protected class PayOrChance extends Action {
         private final int cost = 200;
-        private boolean pay;
+        private boolean pay = true;
         public PayOrChance() {
             super("Du hast die wahl zwischen", "Zahle 200€ oder nimm eine Ereigniskarte.");
         }
         public void setPay(boolean pay) {
             this.pay = pay;
         }
+
+        private final ActionListener choiceListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pay = false;
+                execute();
+                parentUI.disableInfo();
+            }
+        };
+
+        public ActionListener getChoiceListener() {return choiceListener;}
 
         protected void execute() {
             if (pay) {
@@ -201,7 +181,7 @@ public class CommunityAction extends ActionCard{
     }
     protected class GoToPrison extends Action {
         public GoToPrison() {
-            super("Gehe in das Gefängnis. Begib dich direkt dorthin. Gehe nicht über Los.", "Ziehe nicht 4000€ ein.");
+            super("Gehe in das Gefängnis. \n Begib dich direkt dorthin. \n Gehe nicht über Los.", "Ziehe nicht 4000€ ein.");
         }
 
         protected void execute() {

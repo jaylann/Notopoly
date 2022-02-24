@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public class setupUI {
@@ -179,7 +180,8 @@ public class setupUI {
                     bp.add(nextPageButton);
                     bp.add(lastPageButton);
 
-                    players.add(new Player(8000, nameBox.getText(), chosenChar));
+                    players.add(new Player(8000, nameBox.getText(), utils.loadImage(pathTable.get(chosenChar),
+                            (int) (60*scaleFactor), (int) (60*scaleFactor))));
 
                     //Resetting values and removing chosenChar
                     figures.remove(chosenChar);
@@ -357,6 +359,8 @@ public class setupUI {
         bp.add(acceptPageButton);
     }
 
+    private Hashtable<Image, String> pathTable = new Hashtable<>();
+
     private ArrayList<Image> loadFigures(int width, int height) {
         ArrayList<Image> loadList = new ArrayList<>();
 
@@ -369,7 +373,9 @@ public class setupUI {
             assert listOfFiles != null;
             for (File listOfFile : listOfFiles) {
                 if (listOfFile.isFile()) {
-                    loadList.add(utils.loadImage(listOfFile.getPath(), width, height));
+                    Image loadImage = utils.loadImage(listOfFile.getPath(), width, height);
+                    loadList.add(loadImage);
+                    pathTable.put(loadImage, listOfFile.getPath());
                 }
             }
         } catch (NullPointerException e) {
