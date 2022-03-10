@@ -53,6 +53,7 @@ abstract class Property extends Field{
     protected void mortgage() throws alreadyMortgagedException, cannotMortgageHousedPropertyException {
         if (!mortgage) {
             mortgage = true;
+
             owner.addMoney(sellPrice /2);
         }
         else { throw new alreadyMortgagedException(String.format("Cannot mortgage already mortgaged property: %s", name)); }
@@ -68,6 +69,14 @@ abstract class Property extends Field{
 
     protected boolean changeOwner(Player newOwner) {
         if (owner == null) {
+            owner = newOwner;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    protected boolean changeOwner(Player newOwner, boolean override) {
+        if (owner == null || override) {
             owner = newOwner;
             return true;
         } else {

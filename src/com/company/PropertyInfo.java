@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class PropertyInfo extends Info{
     protected PropertyInfo(UI pUI, Property prop, boolean buyable) {
@@ -106,7 +107,7 @@ public abstract class PropertyInfo extends Info{
         if (buyable) {
             return new ArrayList<>(Arrays.asList(buyButton, passButton));
         } else {
-            return new ArrayList<>(Arrays.asList(passButton));
+            return new ArrayList<>(List.of(passButton));
         }
     }
 

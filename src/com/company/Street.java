@@ -62,7 +62,7 @@ public class Street extends Property {
         else if (houses > 0) { throw new cannotMortgageHousedPropertyException(String.format("Cannot mortgage property: %s that contains: %d houses ", name, houses)); }
     }
 
-    public void buildHouse(int amount) throws maxHousesPerPropertyReachedException {
+    public void buyHouse(int amount) throws maxHousesPerPropertyReachedException {
         if(monopolyCheck()) {
             if (houses + amount <= 5) {
                 if (owner.removeMoney(amount*housePrice)) {

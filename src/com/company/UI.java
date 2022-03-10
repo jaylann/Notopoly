@@ -1,5 +1,6 @@
 package com.company;
 
+import com.company.exceptions.maxHousesPerPropertyReachedException;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -37,6 +38,10 @@ public class UI {
     private boolean nextTurnAvailable = false;
     private int[] finalRoll;
     private boolean displayDice = false;
+
+    public Board getBp() {
+        return bp;
+    }
 
     private final ActionListener diceListener = new ActionListener() {
         @Override
@@ -144,11 +149,14 @@ public class UI {
         imgNumbersGolden = loadNumberImages((int) (200*scaleFactor), (int) (200*scaleFactor), true);
         inventoryImage = utils.loadImage("images/inventory.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
         propertyInfoImage = utils.loadImage("images/streetinfo.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
-
-
+        playerInfoImage = utils.loadImage("images/playerinfo.png", (int) (100*scaleFactor), (int) (100*scaleFactor));
 
         hasMoved  =false;
+
+        moneyFont = new Font("Roboto", Font.PLAIN, (int) (40 * scaleFactor));
+        playerNameFont = new Font("Roboto", Font.PLAIN, (int) (50 * scaleFactor));
     }
+    private final Image playerInfoImage;
     private JButton inventoryButton;
     private JButton propertyInfoButton;
     private final Image inventoryImage;
@@ -241,12 +249,26 @@ public class UI {
             g2.drawImage(imgNumbers.get(finalRoll[1]-1), screenWidth/2-diceSecondX, diceY, null);
         }
     }
+    private final Font playerNameFont;
+    private final Color moneyColor = new Color(14, 122, 0);
+    private final Font moneyFont;
+    private void drawPlayerMoney(Graphics2D g2) {
+        g2.setColor(moneyColor);
+        g2.setFont(moneyFont);
+        g2.drawString(String.format("%d €", currentPlayer.getMoney()), 140, 170);
+    }
 
-
+    private void drawPlayerName(Graphics2D g2) {
+        g2.setFont(playerNameFont);
+        g2.setColor(Color.black);
+        g2.drawString(currentPlayer.getName(), (screenWidth/2)-(utils.stringWidth(g2, currentPlayer.getName())/2), 180);
+    }
 
     public void draw(Graphics2D g2) {
         if (setup) { setupui.draw(g2); }
         else {
+            drawPlayerMoney(g2);
+            drawPlayerName(g2);
             //Draw image to click on to roll
             g2.drawImage(diceImage,
                     (int) ((screenWidth/2)-((100*scaleFactor)/2)),
@@ -260,6 +282,7 @@ public class UI {
                     (int) (100*scaleFactor),
                     (int) (100*scaleFactor),
                     null);
+
             if (nextTurnAvailable) {
                 //Draw image to click on to end your turn if its available
                 g2.drawImage(nextTurnImage,
@@ -339,9 +362,9 @@ public class UI {
                 disableButtons(getButtons());
                 inventory.draw(g2);
             }
+
         }
     }
-
     private ArrayList<JButton> getButtons() {
         return new ArrayList<>(Arrays.asList(rollButton, nextButton, inventoryButton, propertyInfoButton));
     }
@@ -400,6 +423,7 @@ public class UI {
                 (int) (100*scaleFactor),
                 (int) ((screenWidth/2)+285*scaleFactor),
                 (int) (screenHeight/1.3), propertyInfoListener);
+
 
     }
 

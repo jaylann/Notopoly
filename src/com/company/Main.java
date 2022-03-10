@@ -18,7 +18,7 @@ public class Main {
         double scaleFactor = 1440/1080.0;
 
         window.setSize((int) (size.getHeight()/scaleFactor), (int) (size.getHeight()/scaleFactor));
-        //window.setSize(1080, 1080);
+        window.setSize(1080, 1080);
 
         Board board = new Board(window);
 

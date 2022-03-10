@@ -94,8 +94,10 @@ public class Board extends JPanel implements  Runnable{
         occupantFirstRowY = (int) (40*scaleFactor);
         occupantSecondRowX = (int) (100*scaleFactor);
         occupantSecondRowY = (int) (100*scaleFactor);
-        
-        
+
+        houseImageHorizontal = utils.loadImage("images/house.png", 20, 30);
+        houseImageVertical = utils.loadImage("images/house.png", 20, 30);
+
         
         board = utils.loadImage("images/board.png", (int) (1080*scaleFactor), (int) (1080*scaleFactor));
         ui = new UI(this);
@@ -175,8 +177,65 @@ public class Board extends JPanel implements  Runnable{
         middleMoney += amount;
     }
 
+    private Image houseImage;
+    private void drawHouses(Graphics2D g2) {
+        for (int i = 0; i< 40; i++) {
+            Field currentField = getPropertyList(i);
+            if (currentField instanceof Street currentStreet) {
+                int houses = currentStreet.getHouses();
+                int part = i/10;
+                int x = 0;
+                int y = 0;
+                int xOffset=0;
+                int yOffset=0;
+                int width = 0;
+                int height= 0;
+                if (houses > 0) {
+                    switch (part) {
+                        case 0 -> {
+                            y = getScreenHeight()-135;
+                            x = getScreenWidth() - 90*(i%10)  -135;
+                            xOffset = 20;
+                            houseImage=houseImageVertical;
+                            width = 20;
+                            height = 30;
+                        }
+                        case 1 -> {
+                            x = 105;
+                            y = getScreenHeight() - 90*(i%10)-135;
+                            yOffset = 20;
+                            houseImage=houseImageHorizontal;
+                            width = 30;
+                            height = 20;
+                        }
+                        case 2 -> {
+                            x = 90*(i%10)+48;
+                            y = 105;
+                            xOffset = 20;
+                            houseImage=houseImageVertical;
+                            width = 20;
+                            height = 30;
+                        }
+                        case 3 -> {
+                            x = getScreenWidth()-135;
+                            y = 90*(i%10)+92;
+                            yOffset = 20;
+                            houseImage=houseImageHorizontal;
+                            width = 30;
+                            height = 20;
 
+                        }
+                    }
+                    for (int j = 0; j < houses; j++) {
+                        g2.drawImage(houseImage, x+((j)*xOffset), y+((j)*yOffset), width,height, null);
+                    }
+                }
+            }
+        }
+    }
 
+    private final Image houseImageHorizontal;
+    private final Image houseImageVertical;
 
     private void drawPlayers(Graphics2D g2) {
 
@@ -210,7 +269,6 @@ public class Board extends JPanel implements  Runnable{
                             y = getScreenHeight()*-1;
                         }
                     }
-                    //TODO: Make it work with 1 player
                     final int xCornerOffset = (int) (x + (occupantWidth * j) + (15*scaleFactor));
                     switch (occupants.size()) {
                         case 1 -> {
@@ -367,10 +425,11 @@ public class Board extends JPanel implements  Runnable{
         g2.drawImage(board, 0,0,null);
         g2.setColor(Color.black);
 
-        ui.draw(g2);
         if (playerList != null) {
             drawPlayers(g2);
         }
+        drawHouses(g2);
+        ui.draw(g2);
 
         g2.dispose();
 

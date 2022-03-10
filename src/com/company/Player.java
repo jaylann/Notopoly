@@ -2,6 +2,7 @@ package com.company;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Random;
 
@@ -10,19 +11,23 @@ public class Player {
     private final Image character;
     private int money;
     private int position = 0;
-    private final ArrayList<Property> properties = new ArrayList<>();
+    private ArrayList<Property> properties = new ArrayList<>();
     private boolean bankrupt = false;
     private int timeInPrison = 0;
     private boolean prison = false;
     private int doubletCount = 0;
     private int recentRoll;
+    private final Image icon;
     private final Random rand = new Random();
-    public Player(int startMoney, String playerName, Image playerCharacter) {
+    public Player(int startMoney, String playerName, Image playerCharacter, Image playerIcon) {
         money = startMoney;
         name = playerName;
         character = playerCharacter;
         money = 50000;
+        this.icon = playerIcon;
     }
+
+    public Image getIcon() {return icon;}
 
     public int getTimeInPrison() {
         return timeInPrison;
@@ -72,7 +77,24 @@ public class Player {
     }
 
     public ArrayList<Property> getProperties() {
-        return properties;
+        boolean hasFound = false;
+        ArrayList<Property> tmp_list = new ArrayList<>();
+        for (Property prop: properties) {
+            hasFound = false;
+            for (int i = 0; i<tmp_list.size(); i++) {
+                if (prop.getID() >= tmp_list.get(tmp_list.size()-i-1).getID()) {
+                    tmp_list.add(tmp_list.size()-i, prop);
+                    hasFound = true;
+                    break;
+                }
+            }
+            if (!hasFound) {
+                tmp_list.add(0,prop);
+            }
+
+        }
+        this.properties = tmp_list;
+        return tmp_list;
     }
 
     public Hashtable<Integer, ArrayList<Property>>getPropertiesSorted() {
@@ -187,12 +209,18 @@ public class Player {
         }
     }
 
+    //Make Private
     private void addProperty(Property property) {
         if (property.changeOwner(this)) {
             properties.add(property);
         } else {
             addMoney(property.getBuyPrice());
         }
+        System.out.println(properties);
+    }
+    public void addProperty(Property property, boolean override) {
+        property.changeOwner(this, true);
+        properties.add(property);
         System.out.println(properties);
     }
 
@@ -226,4 +254,10 @@ public class Player {
     public void addPrisonFree() {
         prisonFreeCards++;
     }
+
+    public int getMoney() {
+        return money;
+    }
+
+
 }

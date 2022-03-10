@@ -181,7 +181,7 @@ public class setupUI {
                     bp.add(lastPageButton);
 
                     players.add(new Player(8000, nameBox.getText(), utils.loadImage(pathTable.get(chosenChar),
-                            (int) (60*scaleFactor), (int) (60*scaleFactor))));
+                            (int) (60*scaleFactor), (int) (60*scaleFactor)), chosenChar));
 
                     //Resetting values and removing chosenChar
                     figures.remove(chosenChar);
