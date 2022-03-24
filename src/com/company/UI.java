@@ -155,6 +155,10 @@ public class UI {
 
         moneyFont = new Font("Roboto", Font.PLAIN, (int) (40 * scaleFactor));
         playerNameFont = new Font("Roboto", Font.PLAIN, (int) (50 * scaleFactor));
+
+        playerMoneyX = (int) (140*scaleFactor);
+        playerMoneyY = (int) (170*scaleFactor);
+        playerNameY = (int) (180*scaleFactor);
     }
     private final Image playerInfoImage;
     private JButton inventoryButton;
@@ -252,16 +256,21 @@ public class UI {
     private final Font playerNameFont;
     private final Color moneyColor = new Color(14, 122, 0);
     private final Font moneyFont;
+    private final int playerMoneyX;
+    private final int playerMoneyY;
+
     private void drawPlayerMoney(Graphics2D g2) {
+
         g2.setColor(moneyColor);
         g2.setFont(moneyFont);
-        g2.drawString(String.format("%d €", currentPlayer.getMoney()), 140, 170);
+        g2.drawString(String.format("%d €", currentPlayer.getMoney()), playerMoneyX, playerMoneyY);
     }
-
+    private final int playerNameY;
     private void drawPlayerName(Graphics2D g2) {
+
         g2.setFont(playerNameFont);
         g2.setColor(Color.black);
-        g2.drawString(currentPlayer.getName(), (screenWidth/2)-(utils.stringWidth(g2, currentPlayer.getName())/2), 180);
+        g2.drawString(currentPlayer.getName(), (screenWidth/2)-(utils.stringWidth(g2, currentPlayer.getName())/2), playerNameY);
     }
 
     public void draw(Graphics2D g2) {

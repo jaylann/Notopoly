@@ -23,7 +23,6 @@ public class Player {
         money = startMoney;
         name = playerName;
         character = playerCharacter;
-        money = 50000;
         this.icon = playerIcon;
     }
 

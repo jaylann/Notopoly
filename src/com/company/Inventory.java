@@ -47,10 +47,10 @@ public class Inventory {
     private final int buttonWidth;
     private final int buttonHeight;
 
-    private final int infoTextX = 175;
-    private final int infoTextY = 225;
-    private final int infoTextCostX = 575;
-    private final int infoTextCostY = 225;
+    private final int infoTextX;
+    private final int infoTextY;
+    private final int infoTextCostX;
+    private final int infoTextCostY;
     //private final JButton nextPageButton;
     //private final JButton lastPageButton;
     //private final JButton closePageButton;
@@ -74,7 +74,7 @@ public class Inventory {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                ((Street) propertyList.get(detailItem)).buyHouse(1);
+                ((Street) propertyList.get(detailItem)).buyHouse();
             } catch (maxHousesPerPropertyReachedException ex) {
                 //TODO: ADD WARNING
                 ex.printStackTrace();
@@ -169,6 +169,27 @@ public class Inventory {
         closeInventoryButton = parentUI.createButton(menuButtonWidth, menuButtonHeight, closeButtonX, menuButtonY, closeInventoryListener);
 
         sortedPropertyList = player.getPropertiesSorted();
+        infoTextCostY = (int) (225*scaleFactor);
+        infoTextCostX = (int) (575*scaleFactor);
+        infoTextX = (int) (175*scaleFactor);
+        infoTextY = (int) (225*scaleFactor);
+
+        detailRectX = (int) (150*scaleFactor);
+        detailRectY= (int) (150*scaleFactor);
+        detailRectHeight= (int) (700*scaleFactor);
+        detailRectWidth= (int) (450*scaleFactor);
+        detailRectArc= (int) (50*scaleFactor);
+        menuRectArc = (int) (50*scaleFactor);
+
+        streetWidth = (int) (250*scaleFactor);
+        streetHeight = (int) (70*scaleFactor);
+        titleArc = (int) (15*scaleFactor);
+
+        detailX= (int) (detailRectX + (225-125)*scaleFactor);
+        detailY = (int) (175*scaleFactor);
+        detailWidth= (int) (250*scaleFactor);
+        detailHeight = (int) (70*scaleFactor);
+        dividerX = (int) (175*scaleFactor);
     }
 
     private final ActionListener nextPageListener = new ActionListener() {
@@ -222,23 +243,29 @@ public class Inventory {
             g2.drawImage(lastPageImage, lastButtonX, menuButtonY, null);
         }
     }
-
+    private final int detailRectX;
+    private final int detailRectY;
+    private final int detailRectWidth;
+    private final int detailRectHeight;
+    private final int detailRectArc;
+    private final int menuRectArc;
     public void draw(Graphics2D g2) {
+
 
         if (tradeWindow == null) {
             if (showDetails) {
                 g2.setStroke(outerStroke);
                 g2.setColor(Color.black);
-                g2.drawRoundRect(150, 150, 450, 700, 50, 50);
+                g2.drawRoundRect(detailRectX, detailRectY, detailRectWidth, detailRectHeight, detailRectArc, detailRectArc);
                 g2.setColor(menuColor);
-                g2.fillRoundRect(150, 150, 450, 700, 50, 50);
+                g2.fillRoundRect(detailRectX, detailRectY, detailRectWidth, detailRectHeight, detailRectX, detailRectArc);
                 drawDetails(g2, detailItem);
             } else {
                 g2.setStroke(outerStroke);
                 g2.setColor(Color.black);
-                g2.drawRoundRect(menuRectX, menuRectY, menuRectWidth, menuRectHeight, 50, 50);
+                g2.drawRoundRect(menuRectX, menuRectY, menuRectWidth, menuRectHeight, menuRectArc, menuRectArc);
                 g2.setColor(menuColor);
-                g2.fillRoundRect(menuRectX, menuRectY, menuRectWidth, menuRectHeight, 50, 50);
+                g2.fillRoundRect(menuRectX, menuRectY, menuRectWidth, menuRectHeight, menuRectArc, menuRectArc);
                 drawProperties(g2);
                 drawMenuButtons(g2);
             }
@@ -259,6 +286,8 @@ public class Inventory {
     }
     private JButton tradeButton;
     private Hashtable<Integer, ArrayList<Property>> sortedPropertyList;
+    private final int streetWidth;
+    private final int streetHeight;
     private void drawProperties(Graphics2D g2) {
 
 
@@ -276,17 +305,16 @@ public class Inventory {
                 ArrayList<Property> sameIndexList = sortedPropertyList.get(key);
                 for (Property property : sameIndexList) {
 
-                    int x = 130 + (285 * (i % 3));
-                    int y = 140 + ((i / 3) * 100);
-                    int width = 250;
-                    int height = 70;
+                    int x = (int) ((130 + (285 * (i % 3)))*scaleFactor);
+                    int y = (int) ((140 + ((i / 3) * 100))*scaleFactor);
 
-                    drawTitle(g2, property, x, y, width, height);
+
+                    drawTitle(g2, property, x, y, streetWidth, streetHeight);
 
                     int finalI = i+(entriesPerPage*page);
                     ActionListener detailListener = e1 -> showDetails(finalI);
 
-                    streetButtons.add(parentUI.createButton(width, height, x, y, detailListener));
+                    streetButtons.add(parentUI.createButton(streetWidth, streetHeight, x, y, detailListener));
                     propertyList.add(property);
                     i++;
                 }
@@ -294,12 +322,14 @@ public class Inventory {
         }
     }
     private final Color mortgageColor = new Color(108, 108, 108);
+    private final int titleArc;
     private void drawTitle(Graphics2D g2, Property prop, int x, int y, int width, int height) {
+
         g2.setFont(nameFont);
         g2.setStroke(outerCardStroke);
         g2.setColor(Color.black);
 
-        g2.drawRoundRect(x, y, width, height, 15, 15);
+        g2.drawRoundRect(x, y, width, height, titleArc, titleArc);
         if (prop.isMortgaged()) {
             g2.setColor(mortgageColor);
         } else {
@@ -309,39 +339,45 @@ public class Inventory {
                 g2.setColor(Color.white);
             }
         }
-        g2.fillRoundRect(x, y, width, height, 15, 15);
+        g2.fillRoundRect(x, y, width, height, titleArc, titleArc);
         g2.setColor(Color.black);
 
-        if (utils.stringWidth(g2, prop.getName()) > (width - 20)) {
-            g2.setFont(utils.getFittingFont(g2, prop.getName(), nameFont, width - 20));
+        if (utils.stringWidth(g2, prop.getName()) > (width - 20*scaleFactor)) {
+            g2.setFont(utils.getFittingFont(g2, prop.getName(), nameFont, (int) (width - 20*scaleFactor)));
         }
         g2.drawString(prop.getName(), (x + width / 2) - (utils.stringWidth(g2, prop.getName()) / 2), (int) (y + (height / 1.5)));
     }
-
+    private final int detailX;
+    private final int detailY;
+    private final int detailWidth;
+    private final int detailHeight;
+    private final int dividerX;
     private void drawDetails(Graphics2D g2, int index) {
-        int x = 150 + 225 - 125;
+        int x = detailRectX + 225 - 125;
         int y = 175;
         int width = 250;
         int height = 70;
+
+
         parentUI.disableButtons(streetButtons);
 
-        drawTitle(g2, propertyList.get(index), x, y, width, height);
+        drawTitle(g2, propertyList.get(index), detailX, detailY, detailWidth, detailHeight);
 
         if (propertyList.get(index) instanceof Street) {
             drawHousePrices(g2, (Street) propertyList.get(index));
             drawStreetInformation(g2, (Street) propertyList.get(index));
             drawStreetButtons(g2, (Street) propertyList.get(index));
-            drawDivider(g2, 175, 670);
-            drawDivider(g2, 175, 590);
+            drawDivider(g2, dividerX, (int) (670*scaleFactor));
+            drawDivider(g2, dividerX, (int) (590*scaleFactor));
         } else if (propertyList.get(index) instanceof TrainStation) {
             //drawTrainButtons(g2, (TrainStation) propertyList.get(index));
             drawButtons(g2, propertyList.get(index));
-            drawDivider(g2, 175, 500);
+            drawDivider(g2, dividerX, (int) (500*scaleFactor));
             drawTrainInformation(g2, (TrainStation) propertyList.get(index));
         } else if (propertyList.get(index) instanceof UtilityCompany) {
             drawButtons(g2, propertyList.get(index));
-            drawDivider(g2, 175, 390);
-            drawDivider(g2, 175, 530);
+            drawDivider(g2, dividerX, (int) (390*scaleFactor));
+            drawDivider(g2, dividerX, (int) (530*scaleFactor));
             drawUtilityInformation(g2, (UtilityCompany) propertyList.get(index));
         }
     }
@@ -402,7 +438,7 @@ public class Inventory {
                 startingIndex++;
                 tmpString = new StringBuilder(s);
             }
-            else if (utils.stringWidth(g2, tmpString + " " + s) > (450-40)) {
+            else if (utils.stringWidth(g2, tmpString + " " + s) > (detailRectWidth-40*scaleFactor)) {
                 drawLine(tmpString.toString(), g2, centered,startingIndex,paragraph);
                 startingIndex++;
                 tmpString = new StringBuilder(s);
@@ -424,7 +460,7 @@ public class Inventory {
         int y = (int) (infoTextY + (75 + ((index + (paragraph / 2)) * 25)) * scaleFactor);
 
         if (centered) {
-            g2.drawString(text, (450/2)-(utils.stringWidth(g2, text)/2)+150, y);
+            g2.drawString(text, (detailRectWidth/2)-(utils.stringWidth(g2, text)/2)+150, y);
         } else {
             g2.drawString(text, infoTextX, y);
         }

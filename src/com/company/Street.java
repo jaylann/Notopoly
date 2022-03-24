@@ -62,11 +62,11 @@ public class Street extends Property {
         else if (houses > 0) { throw new cannotMortgageHousedPropertyException(String.format("Cannot mortgage property: %s that contains: %d houses ", name, houses)); }
     }
 
-    public void buyHouse(int amount) throws maxHousesPerPropertyReachedException {
-        if(monopolyCheck()) {
-            if (houses + amount <= 5) {
-                if (owner.removeMoney(amount*housePrice)) {
-                    houses += amount;
+    public void buyHouse() throws maxHousesPerPropertyReachedException {
+        if(monopolyCheck() && limitCheck(houses)) {
+            if (houses + 1 <= 5) {
+                if (owner.removeMoney(housePrice)) {
+                    houses++;
                     rent = priceList.get(houses);
                 } else {
                     parentUI.notEnoughMoneyWarning();
@@ -81,6 +81,16 @@ public class Street extends Property {
 
     }
 
+    private boolean limitCheck(int houses) {
+        int other_houses=0;
+        for (Street street: getBlock()) {
+            if (street.getHouses()>other_houses) {
+                other_houses = street.getHouses();
+            }
+        }
+        return Math.abs(houses - other_houses) <= 1;
+    }
+
     public void sellHouse(int amount) throws negativeHousesException {
         if (houses - amount >= 0) {
             houses -= amount;
@@ -92,11 +102,7 @@ public class Street extends Property {
 
 
     public boolean monopolyCheck() {
-        if (getBlock().size() == maxStreets) {
-            monopoly = true;
-        } else {
-            monopoly = false;
-        }
+        monopoly = getBlock().size() == maxStreets;
         return monopoly;
     }
 

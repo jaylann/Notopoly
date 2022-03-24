@@ -171,6 +171,7 @@ public class ChanceAction extends ActionCard{
         }
         protected void execute() {
             targetPlayer.setPosition(targetPlayer.getPosition()-3);
+            parentUI.disableInfo();
             targetPlayer.landOn(bp.getPropertyList(targetPlayer.getPosition()));
         }
     }

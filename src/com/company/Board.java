@@ -54,8 +54,11 @@ public class Board extends JPanel implements  Runnable{
     private final int occupantSecondRowX; 
     private final int occupantSecondRowY; 
     private final int occupantFirstRowX; 
-    private final int occupantFirstRowY; 
-    
+    private final int occupantFirstRowY;
+
+    private final Image hotelImageHorizontal;
+    private final Image hotelImageVertical;
+
     public Board(JFrame frame) {
         String[] nameList = {"Los", "Badstrasse", "Gemeinschaftsfeld", "Turmstrasse", "Einkommensteuer", "Südbahnhof",
                 "Chausseestrasse", "Ereignisfeld", "Elisenstrasse", "Poststrasse", "Gefängnis", "Seestrasse",
@@ -96,7 +99,9 @@ public class Board extends JPanel implements  Runnable{
         occupantSecondRowY = (int) (100*scaleFactor);
 
         houseImageHorizontal = utils.loadImage("images/house.png", 20, 30);
-        houseImageVertical = utils.loadImage("images/house.png", 20, 30);
+        houseImageVertical = utils.loadImage("images/house.png", 30, 20);
+        hotelImageHorizontal = utils.loadImage("images/hotel.png",20,30 );
+        hotelImageVertical = utils.loadImage("images/hotel.png",30,20);
 
         
         board = utils.loadImage("images/board.png", (int) (1080*scaleFactor), (int) (1080*scaleFactor));
@@ -177,8 +182,9 @@ public class Board extends JPanel implements  Runnable{
         middleMoney += amount;
     }
 
-    private Image houseImage;
     private void drawHouses(Graphics2D g2) {
+        Image houseImage = null;
+        Image hotelImage = null;
         for (int i = 0; i< 40; i++) {
             Field currentField = getPropertyList(i);
             if (currentField instanceof Street currentStreet) {
@@ -190,6 +196,7 @@ public class Board extends JPanel implements  Runnable{
                 int yOffset=0;
                 int width = 0;
                 int height= 0;
+
                 if (houses > 0) {
                     switch (part) {
                         case 0 -> {
@@ -197,6 +204,7 @@ public class Board extends JPanel implements  Runnable{
                             x = getScreenWidth() - 90*(i%10)  -135;
                             xOffset = 20;
                             houseImage=houseImageVertical;
+                            hotelImage = hotelImageVertical;
                             width = 20;
                             height = 30;
                         }
@@ -205,6 +213,7 @@ public class Board extends JPanel implements  Runnable{
                             y = getScreenHeight() - 90*(i%10)-135;
                             yOffset = 20;
                             houseImage=houseImageHorizontal;
+                            hotelImage = hotelImageHorizontal;
                             width = 30;
                             height = 20;
                         }
@@ -213,6 +222,7 @@ public class Board extends JPanel implements  Runnable{
                             y = 105;
                             xOffset = 20;
                             houseImage=houseImageVertical;
+                            hotelImage = hotelImageVertical;
                             width = 20;
                             height = 30;
                         }
@@ -221,14 +231,20 @@ public class Board extends JPanel implements  Runnable{
                             y = 90*(i%10)+92;
                             yOffset = 20;
                             houseImage=houseImageHorizontal;
+                            hotelImage = hotelImageHorizontal;
                             width = 30;
                             height = 20;
 
                         }
                     }
-                    for (int j = 0; j < houses; j++) {
-                        g2.drawImage(houseImage, x+((j)*xOffset), y+((j)*yOffset), width,height, null);
+                    if (houses==5) {
+                        g2.drawImage(hotelImage, (int) (x+((2.5)*xOffset)), (int) (y+((2.5)*yOffset)), width,height, null);
+                    } else {
+                        for (int j = 0; j < houses; j++) {
+                            g2.drawImage(houseImage, x+((j)*xOffset), y+((j)*yOffset), width,height, null);
+                        }
                     }
+
                 }
             }
         }

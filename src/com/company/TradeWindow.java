@@ -43,31 +43,37 @@ public class TradeWindow {
         menuHeight = (int) (600*scaleFactor);
         menuArc = (int) (50*scaleFactor);
 
-        priceX = menuX+((menuWidth/2)-(250/2));
-        priceY = 750;
-        priceWidth=250;
-        priceHeight=60;
+        priceX = (int) (menuX+((menuWidth/2)-(250/2)*scaleFactor));
+        priceY = (int) (750*scaleFactor);
+        priceWidth= (int) (250*scaleFactor);
+        priceHeight= (int) (60*scaleFactor);
 
-        closeButtonX = menuX+10;
-        closeButtonY=menuY+menuHeight-70;
-        acceptButtonY=menuY+menuHeight-70;
-        buttonWidth=60;
-        buttonHeight=60;
-        acceptButtonX = menuX+menuWidth-buttonWidth-10;
+        closeButtonX = (int) (menuX+10*scaleFactor);
+        closeButtonY= (int) (menuY+menuHeight-70*scaleFactor);
+        acceptButtonY= (int) (menuY+menuHeight-70*scaleFactor);
+        buttonWidth= (int) (60*scaleFactor);
+        buttonHeight= (int) (60*scaleFactor);
+        acceptButtonX = (int) (menuX+menuWidth-buttonWidth-10*scaleFactor);
 
         acceptImage = utils.loadImage("images/tick.png",buttonWidth,buttonHeight);
         closeImage = utils.loadImage("images/close.png",buttonWidth,buttonHeight);
 
 
-        nameBox = new JTextArea();
-        nameBox.setEditable(true);
-        nameBox.setBounds(priceX, priceY, priceWidth, priceHeight);
-        nameBox.setOpaque(false);
+        priceBox = new JTextArea();
+        priceBox.setEditable(true);
+        priceBox.setBounds(priceX, priceY, priceWidth, priceHeight);
+        priceBox.setOpaque(false);
         emptyTextColor = new Color(200, 200, 200, 180);
         nameFont = new Font("Roboto", Font.PLAIN, (int) (20 * scaleFactor));
 
         closeButton = parentUI.createButton(buttonWidth,buttonHeight,closeButtonX,closeButtonY,closeListener);
         acceptButton = parentUI.createButton(buttonWidth,buttonHeight,acceptButtonX,acceptButtonY,acceptListener);
+        playerCharWidth = (int) (200*scaleFactor);
+        playerCharHeight = (int) (200*scaleFactor);
+        playerCharArc = (int) (20*scaleFactor);
+        priceBoxArc = (int) (25*scaleFactor);
+        priceTextX = (int) (priceX+20*scaleFactor);
+        priceTextY = (int) (priceY+50*scaleFactor);
     }
     private final ActionListener closeListener = new ActionListener() {
         @Override
@@ -79,10 +85,12 @@ public class TradeWindow {
     private final ActionListener acceptListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (targetPlayer.removeMoney(Integer.parseInt(nameBox.getText()))) {
+            int auctionPrice = Integer.parseInt(priceBox.getText());
+            if (targetPlayer.removeMoney(auctionPrice)) {
                 for (Property prop: selectedList) {
                     player.addProperty(prop, true);
                 }
+                player.addMoney(auctionPrice);
                 disable();
                 parentInv.disableTradeWindow();
             }
@@ -95,7 +103,7 @@ public class TradeWindow {
     }
     private JButton closeButton;
     private JButton acceptButton;
-    private final JTextArea nameBox;
+    private final JTextArea priceBox;
     private final Stroke innerStroke;
     private final Color innerColor = new Color(88, 88, 88,220);
     private final Stroke outerStroke;
@@ -118,18 +126,20 @@ public class TradeWindow {
     private final int menuHeight;
     private final int menuArc;
     private Font nameFont;
-
+    private final int playerCharWidth;
+    private final int playerCharHeight;
+    private final int playerCharArc;
     private void drawPlayers(Graphics2D g2) {
         int i = 0;
         for (Player p: playerList) {
 
             if (p != player) {
-                int x = 300 + (280*(i%2));
-                int y = 300 + (280*(i/2));
-                g2.drawImage(p.getIcon(), x,y,200,200,null);
+                int x = (int) ((300 + (280*(i%2)))*scaleFactor);
+                int y = (int) ((300 + (280*(i/2)))*scaleFactor);
+                g2.drawImage(p.getIcon(), x,y,playerCharWidth,playerCharHeight,null);
                 g2.setColor(Color.white);
                 g2.setStroke(innerStroke);
-                g2.drawRoundRect(x,y,200,200,20,20);
+                g2.drawRoundRect(x,y,playerCharWidth,playerCharHeight,playerCharArc,playerCharArc);
                 i++;
                 int finalI = i;
                 ActionListener playerListener = new ActionListener() {
@@ -139,10 +149,11 @@ public class TradeWindow {
                         chosen = true;
                     }
                 };
-                btnList.add(parentUI.createButton(200,200,x,y,playerListener));
+                btnList.add(parentUI.createButton(playerCharWidth,playerCharHeight,x,y,playerListener));
             }
         }
     }
+    private final int priceBoxArc;
     private ArrayList<JButton> btnList = new ArrayList<>();
     private boolean chosen;
     private Player targetPlayer;
@@ -150,14 +161,14 @@ public class TradeWindow {
         this.drawIndex = index;
         this.targetPlayer = p;
         parentUI.disableButtons(btnList);
-        bp.add(nameBox);
+        bp.add(priceBox);
         targetPlayerProperties = targetPlayer.getProperties();
         int height = 50;
         int width = 180;
 
         for(int i =0; i<targetPlayerProperties.size(); i++) {
-            int x = menuX + 10 + (200*(i%3));
-            int y = menuY + 20 + (60*(i/3));
+            int x = (int) (menuX + (10 + (200*(i%3)))*scaleFactor);
+            int y = (int) (menuY + (20 + (60*(i/3)))*scaleFactor);
             propButtonList.add(parentUI.createButton(width,height,x,y, propListener));
         }
 
@@ -169,38 +180,40 @@ public class TradeWindow {
     private final int priceWidth;
     private final int priceHeight;
     private final Color emptyTextColor;
+    private final int priceTextX;
+    private final int priceTextY;
     private void drawSum(Graphics2D g2) {
         g2.setColor(Color.white);
         g2.setStroke(innerStroke);
-        g2.drawRoundRect(priceX,priceY,priceWidth,priceHeight,25,25);
+        g2.drawRoundRect(priceX,priceY,priceWidth,priceHeight,priceBoxArc,priceBoxArc);
 
         g2.drawImage(acceptImage, acceptButtonX, acceptButtonY ,buttonWidth,buttonHeight,null);
         g2.drawImage(closeImage, closeButtonX, closeButtonY ,buttonWidth,buttonHeight,null);
 
-        if (nameBox.getText().isEmpty()) {
+        if (priceBox.getText().isEmpty()) {
             g2.setColor(emptyTextColor);
-            g2.drawString("Price", priceX+20, priceY+50);
+            g2.drawString("Price", priceTextX, priceTextY);
         } else {
             //Sanitizing String
-            if (!nameBox.getText().matches("[0-9]+")) {
-                nameBox.setText(nameBox.getText().substring(0, nameBox.getText().length() - 1));
+            if (!priceBox.getText().matches("[0-9]+")) {
+                priceBox.setText(priceBox.getText().substring(0, priceBox.getText().length() - 1));
             }
-            if (Integer.parseInt(nameBox.getText()) > targetPlayer.getMoney()) {
+            if (Integer.parseInt(priceBox.getText()) > targetPlayer.getMoney()) {
                 //Removing last character
-                nameBox.setText(Integer.toString(targetPlayer.getMoney()));
+                priceBox.setText(Integer.toString(targetPlayer.getMoney()));
             }
             g2.setColor(Color.white);
-            g2.drawString(nameBox.getText(), priceX+20, priceY+50);
+            g2.drawString(priceBox.getText(),priceTextX , priceTextY);
         }
     }
     private ArrayList<Property> targetPlayerProperties;
     private void drawSelectableProperties(Graphics2D g2) {
 
-        int height = 50;
-        int width = 180;
+        int height = (int) (50*scaleFactor);
+        int width = (int) (180*scaleFactor);
         for(int i = 0; i < targetPlayerProperties.size(); i++) {
-            int x = menuX + 10 + (200*(i%3));
-            int y = menuY + 20 + (60*(i/3));
+            int x = (int) (menuX + (10 + (200*(i%3)))*scaleFactor);
+            int y = (int) (menuY + (20 + (60*(i/3)))*scaleFactor);
             Property prop = targetPlayerProperties.get(i);
 
             g2.setStroke(innerStroke);
@@ -209,16 +222,16 @@ public class TradeWindow {
             } else {
                 g2.setColor(Color.black);
             }
-            g2.drawRoundRect(x,y,width,height,25,25);
+            g2.drawRoundRect(x,y,width,height,priceBoxArc,priceBoxArc);
             if (targetPlayerProperties.get(i) instanceof Street street) {
                 g2.setColor(street.getColor());
             } else {
                 g2.setColor(Color.white);
             }
-            g2.fillRoundRect(x,y,width,height,25,25);
+            g2.fillRoundRect(x,y,width,height,priceBoxArc,priceBoxArc);
             g2.setColor(Color.black);
             g2.setFont(utils.getFittingFont(g2, prop.getName(),nameFont,width));
-            g2.drawString(prop.getName(), x+(width/2)-(utils.stringWidth(g2, prop.getName())/2) ,y+30);
+            g2.drawString(prop.getName(), (int) (x+((width/2)-(utils.stringWidth(g2, prop.getName())/2))*scaleFactor), (int) (y+30*scaleFactor));
 
         }
     }
@@ -233,10 +246,10 @@ public class TradeWindow {
             int x = Integer.parseInt(coordinateString[0]);
             int y = Integer.parseInt(coordinateString[1]);
             for (int i=0; i<targetPlayer.getProperties().size();i++) {
-                if (x == menuX + 10 + (200*(i%3))) {
+                if (x == menuX + (10 + (200*(i%3)))*scaleFactor) {
                     x = i%3;
                 }
-                if (y == menuY + 20 + (60*(i/3))) {
+                if (y == menuY + (20 + (60*(i/3)))*scaleFactor) {
                     y = (i/3)*3;
                 }
             }
