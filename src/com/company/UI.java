@@ -260,10 +260,24 @@ public class UI {
     private final int playerMoneyY;
 
     private void drawPlayerMoney(Graphics2D g2) {
-
-        g2.setColor(moneyColor);
         g2.setFont(moneyFont);
-        g2.drawString(String.format("%d €", currentPlayer.getMoney()), playerMoneyX, playerMoneyY);
+        System.out.println(currentPlayer.getMoney());
+        if (!currentPlayer.checkDebt()) {
+            g2.setColor(moneyColor);
+            g2.drawString(String.format("%d €", currentPlayer.getMoney()), playerMoneyX, playerMoneyY);
+        } else {
+            g2.setColor(Color.red);
+            g2.drawString(String.format("-%d €", currentPlayer.getDebt()), playerMoneyX, playerMoneyY);
+            if (currentPlayer.removeDebt()) {
+                System.out.println("REMOVING DEBT");
+                System.out.println(currentPlayer.getMoney());
+                nextTurnAvailable = true;
+            }
+
+        }
+
+
+
     }
     private final int playerNameY;
     private void drawPlayerName(Graphics2D g2) {
@@ -334,8 +348,12 @@ public class UI {
                         hasMoved = true;
                         if (!currentPlayer.isDoublets()) {
                             System.out.println(actionInfo);
-                            if (actionInfo == null) {
+                            if (actionInfo == null && !currentPlayer.checkDebt()) {
                                 nextTurnAvailable = true;
+                            } else if (currentPlayer.checkDebt()) {
+
+                                drawWarning(g2, String.format("DU MUSST NOCH %d € AN SCHULDEN BEGLEICHEN", currentPlayer.getDebt()));
+
                             }
                         }
 

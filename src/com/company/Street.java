@@ -63,7 +63,7 @@ public class Street extends Property {
     }
 
     public void buyHouse() throws maxHousesPerPropertyReachedException {
-        if(monopolyCheck() && limitCheck(houses)) {
+        if(monopolyCheck() && limitCheck(houses+1)) {
             if (houses + 1 <= 5) {
                 if (owner.removeMoney(housePrice)) {
                     houses++;
@@ -125,9 +125,9 @@ public class Street extends Property {
     public void landOn(Player p) {
         if (!p.equals(owner) && owner != null) {
 
-            int payment = rent;
-            if (monopolyCheck()) {
-                payment = 2*rent;
+            int payment = getRent();
+            if (monopolyCheck() && houses == 0) {
+                payment = 2*getRent();
             }
 
             try {

@@ -124,7 +124,8 @@ public class Inventory {
     };
 
     private final int entriesPerPage = 21;
-
+    private final int imageWidth;
+    private final int imageHeight;
     public Inventory(Player p, Board bp, UI parentUI) {
         this.player = p;
         this.bp = bp;
@@ -160,9 +161,11 @@ public class Inventory {
         nextButtonX = (int) (parentUI.getWidth()-menuRectX-(menuButtonWidth/2));
         lastButtonX= (int) (menuRectX+menuButtonWidth/2);
 
-        closeButtonImage = utils.loadImage("images/close.png", 60,60);
-        nextPageImage = utils.loadImage("images/next.png", 60,60);
-        lastPageImage = utils.loadImage("images/back.png", 60,60);
+        imageHeight = (int) (60*scaleFactor);
+        imageWidth = (int) (60*scaleFactor);
+        closeButtonImage = utils.loadImage("images/close.png", imageHeight,imageWidth);
+        nextPageImage = utils.loadImage("images/next.png", imageHeight,imageWidth);
+        lastPageImage = utils.loadImage("images/back.png", imageHeight,imageWidth);
 
         nextPageButton = parentUI.createButton(menuButtonWidth, menuButtonHeight, nextButtonX, menuButtonY, nextPageListener);
         lastPageButton = parentUI.createButton(menuButtonWidth, menuButtonHeight, lastButtonX, menuButtonY, lastPageListener);
@@ -353,12 +356,6 @@ public class Inventory {
     private final int detailHeight;
     private final int dividerX;
     private void drawDetails(Graphics2D g2, int index) {
-        int x = detailRectX + 225 - 125;
-        int y = 175;
-        int width = 250;
-        int height = 70;
-
-
         parentUI.disableButtons(streetButtons);
 
         drawTitle(g2, propertyList.get(index), detailX, detailY, detailWidth, detailHeight);
@@ -460,7 +457,7 @@ public class Inventory {
         int y = (int) (infoTextY + (75 + ((index + (paragraph / 2)) * 25)) * scaleFactor);
 
         if (centered) {
-            g2.drawString(text, (detailRectWidth/2)-(utils.stringWidth(g2, text)/2)+150, y);
+            g2.drawString(text, (int) ((detailRectWidth/2)-(utils.stringWidth(g2, text)/2)+150*scaleFactor), y);
         } else {
             g2.drawString(text, infoTextX, y);
         }
@@ -478,17 +475,17 @@ public class Inventory {
             sellHouseButton = parentUI.createButton(buttonWidth, buttonHeight, firstColumnButtonX, secondRowButtonY, sellHouseListener);
         }
         drawButton(g2, firstColumnButtonX, firstRowButtonY, buttonWidth, buttonHeight, 10, buttonStroke, buyColor);
-        drawStringAtCenter(g2, "Haus Kaufen", firstColumnButtonX + (buttonWidth / 2), firstRowButtonY + 25, smallTextFont);
-        drawStringAtCenter(g2, String.format("%d €", street.getHousePrice()), firstColumnButtonX + (buttonWidth / 2), firstRowButtonY + 55, smallTextFont);
+        drawStringAtCenter(g2, "Haus Kaufen", firstColumnButtonX + (buttonWidth / 2), (int) (firstRowButtonY + 25*scaleFactor), smallTextFont);
+        drawStringAtCenter(g2, String.format("%d €", street.getHousePrice()), firstColumnButtonX + (buttonWidth / 2), (int) (firstRowButtonY + 55*scaleFactor), smallTextFont);
 
 
 
         drawButton(g2, firstColumnButtonX, secondRowButtonY, buttonWidth, buttonHeight, 10, buttonStroke, sellColor);
-        drawStringAtCenter(g2, "Verkaufen", firstColumnButtonX + (buttonWidth / 2), secondRowButtonY + 40, smallTextFont);
-        drawStringAtCenter(g2, String.format("%d €", street.getHousePrice() / 2), secondColumnButtonX + (buttonWidth / 2), secondRowButtonY + 55, smallTextFont);
+        drawStringAtCenter(g2, "Verkaufen", firstColumnButtonX + (buttonWidth / 2), (int) (secondRowButtonY + 40*scaleFactor), smallTextFont);
+        drawStringAtCenter(g2, String.format("%d €", street.getHousePrice() / 2), secondColumnButtonX + (buttonWidth / 2), (int) (secondRowButtonY + 55*scaleFactor), smallTextFont);
 
         drawButton(g2, secondColumnButtonX, firstRowButtonY, buttonWidth, buttonHeight, 10, buttonStroke, warningColor);
-        drawStringAtCenter(g2, "Handeln", secondColumnButtonX + (buttonWidth / 2), firstRowButtonY + 40, textFont);
+        drawStringAtCenter(g2, "Handeln", secondColumnButtonX + (buttonWidth / 2), (int) (firstRowButtonY + 40*scaleFactor), textFont);
 
         drawStandardButtons(g2, secondColumnButtonX, thirdColumnButtonX, firstRowButtonY, secondRowButtonY, buttonWidth,buttonHeight);
 
@@ -496,7 +493,7 @@ public class Inventory {
     }
     private void drawButtons(Graphics2D g2 ,Property prop) {
         int width = (int) (buttonWidth*1.5);
-        int secondColumnX = secondColumnButtonX+(buttonWidth/2)+20;
+        int secondColumnX = (int) (secondColumnButtonX+(buttonWidth/2)+20*scaleFactor);
         drawStandardButtons(g2, firstColumnButtonX, secondColumnX, firstRowButtonY, secondRowButtonY, width,buttonHeight);
 
 
@@ -524,19 +521,19 @@ public class Inventory {
             mortgageButton = parentUI.createButton(width, height, secondX, firstY, mortgageListener);
         }
         drawButton(g2, firstX, firstY, width, height, 10, buttonStroke, warningColor);
-        drawStringAtCenter(g2, "Handeln", firstX + (width / 2), firstY + 40, textFont);
+        drawStringAtCenter(g2, "Handeln", firstX + (width / 2), (int) (firstY + 40*scaleFactor), textFont);
 
 
         drawButton(g2, firstX, secondY, width, height, 10, buttonStroke, sellColor);
-        drawStringAtCenter(g2, "Zurück", firstX + (width / 2), secondY + 40, textFont);
+        drawStringAtCenter(g2, "Zurück", firstX + (width / 2), (int) (secondY + 40*scaleFactor), textFont);
 
         drawButton(g2, secondX, secondY, width, height, 10, buttonStroke, buyColor);
-        drawStringAtCenter(g2, "Hypothek", secondX + (width / 2), secondY + 25, smallTextFont);
-        drawStringAtCenter(g2, "Auflösen", secondX + (width / 2), secondY + 55, smallTextFont);
+        drawStringAtCenter(g2, "Hypothek", secondX + (width / 2), (int) (secondY + 25*scaleFactor), smallTextFont);
+        drawStringAtCenter(g2, "Auflösen", secondX + (width / 2), (int) (secondY + 55*scaleFactor), smallTextFont);
 
         drawButton(g2, secondX, firstY, width, height, 10, buttonStroke, sellColor);
-        drawStringAtCenter(g2, "Hypothek", secondX + (width / 2), firstY + 25, smallTextFont);
-        drawStringAtCenter(g2, "Aufnehmen", secondX + (width / 2), firstY + 55, smallTextFont);
+        drawStringAtCenter(g2, "Hypothek", secondX + (width / 2), (int) (firstY + 25*scaleFactor), smallTextFont);
+        drawStringAtCenter(g2, "Aufnehmen", secondX + (width / 2), (int) (firstY + 55*scaleFactor), smallTextFont);
 
 
 

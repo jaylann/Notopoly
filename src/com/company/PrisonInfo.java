@@ -23,7 +23,15 @@ public class PrisonInfo extends Info {
             System.out.println(price);
             System.out.println(bp.getPrisonField().getPrice());
             if (parentUI.getCurrentPlayer().getTimeInPrison() > 0) {
-                if (!parentUI.getCurrentPlayer().payMiddle(bp.getPrisonField().getPrice(), bp, false)) {
+                if (parentUI.getCurrentPlayer().hasPrisonFree()) {
+                    parentUI.getCurrentPlayer().removePrisonFree();
+                    parentUI.disableInfo();
+                    parentUI.getCurrentPlayer().setPrison(false);
+                    if (parentUI.getCurrentPlayer().getRecentRoll() != 0) {
+                        parentUI.getCurrentPlayer().move(parentUI.getCurrentPlayer().getRecentRoll(), bp);
+                    }
+                }
+                else if (!parentUI.getCurrentPlayer().payMiddle(bp.getPrisonField().getPrice(), bp, false)) {
                     parentUI.notEnoughMoneyWarning();
                 } else {
                     parentUI.disableInfo();

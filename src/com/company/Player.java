@@ -10,11 +10,13 @@ public class Player {
     private final String name;
     private final Image character;
     private int money;
+    private int debt;
     private int position = 0;
     private ArrayList<Property> properties = new ArrayList<>();
     private boolean bankrupt = false;
     private int timeInPrison = 0;
     private boolean prison = false;
+    private Player due;
     private int doubletCount = 0;
     private int recentRoll;
     private final Image icon;
@@ -133,11 +135,30 @@ public class Player {
     }
 
     public String getName() {return name;}
-
+    public boolean removeDebt() {
+        if (money >= debt) {
+            removeMoney(debt);
+            if (due != null) {
+                due.addMoney(debt);
+            }
+            bankrupt = false;
+            return true;
+        }
+        return false;
+    }
+    public int getDebt() {
+        return debt;
+    }
+    public boolean checkDebt() {
+        if (debt == 0) {
+            bankrupt = false;
+        }
+        return bankrupt;
+    }
     public void landOn(Field landed) {
         landed.landOn(this);
     }
-    public int removeMoney(int amount, boolean forced) {
+    public int removeMoney(int amount, boolean forced, Player payTo) {
 
         if (!forced) {
             if (money - amount >= 0) {
@@ -148,8 +169,10 @@ public class Player {
             }
         } else {
             if (money - amount < 0) {
-                money = 0;
+                debt = amount-money;
                 bankrupt = true;
+                due = payTo;
+                money = 0;
                 return amount + (money - amount);
             } else {
                 money -= amount;
@@ -223,9 +246,8 @@ public class Player {
         System.out.println(properties);
     }
 
-    private void removeProperty(Property property) {
+    public void removeProperty(Property property) {
         properties.remove(property);
-        property.changeOwner(null);
     }
 
     public Image getCharacter() {
@@ -241,7 +263,7 @@ public class Player {
     }
 
     public boolean payMiddle(int amount, Board bp, boolean forced) {
-        int paidMoney = removeMoney(amount, forced);
+        int paidMoney = removeMoney(amount, forced, null);
         bp.addMiddleMoney(paidMoney);
         return paidMoney == amount || forced;
 
@@ -259,4 +281,11 @@ public class Player {
     }
 
 
+    public boolean hasPrisonFree() {
+        return prisonFreeCards > 0;
+    }
+
+    public void removePrisonFree() {
+        this.prisonFreeCards--;
+    }
 }

@@ -67,7 +67,29 @@ public class TradeWindow {
         nameFont = new Font("Roboto", Font.PLAIN, (int) (20 * scaleFactor));
 
         closeButton = parentUI.createButton(buttonWidth,buttonHeight,closeButtonX,closeButtonY,closeListener);
-        acceptButton = parentUI.createButton(buttonWidth,buttonHeight,acceptButtonX,acceptButtonY,acceptListener);
+        ActionListener acceptListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int auctionPrice = 0;
+                if (!priceBox.getText().isEmpty()) {
+                    auctionPrice = Integer.parseInt(priceBox.getText());
+                }
+                if (targetPlayer.removeMoney(auctionPrice)) {
+                    for (Property property : selectedList) {
+                        player.addProperty(property, true);
+                        targetPlayer.removeProperty(property);
+                    }
+                    player.addMoney(auctionPrice);
+                    player.removeProperty(prop);
+                    targetPlayer.addProperty(prop, true);
+                    disable();
+                    parentInv.disableTradeWindow();
+                }
+
+            }
+
+        };
+        acceptButton = parentUI.createButton(buttonWidth,buttonHeight,acceptButtonX,acceptButtonY, acceptListener);
         playerCharWidth = (int) (200*scaleFactor);
         playerCharHeight = (int) (200*scaleFactor);
         playerCharArc = (int) (20*scaleFactor);
@@ -82,21 +104,7 @@ public class TradeWindow {
             parentInv.disableTradeWindow();
         }
     };
-    private final ActionListener acceptListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int auctionPrice = Integer.parseInt(priceBox.getText());
-            if (targetPlayer.removeMoney(auctionPrice)) {
-                for (Property prop: selectedList) {
-                    player.addProperty(prop, true);
-                }
-                player.addMoney(auctionPrice);
-                disable();
-                parentInv.disableTradeWindow();
-            }
-        }
 
-    };
     private void disable() {
         parentUI.disableButtons(new ArrayList<>(Arrays.asList(closeButton, acceptButton)));
         parentUI.disableButtons(btnList);

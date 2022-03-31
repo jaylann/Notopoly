@@ -49,7 +49,7 @@ public class CommunityAction extends ActionCard{
             for (Player p: bp.getPlayerList()) {
                 if (!p.equals(targetPlayer)) {
                     System.out.println(String.format("REMOVED %d€ from PLAYER: %s", cost,p.getName()));
-                    payedMoney = p.removeMoney(cost,true);
+                    payedMoney = p.removeMoney(cost,true, targetPlayer);
                     targetPlayer.addMoney(payedMoney);
                 }
             }
